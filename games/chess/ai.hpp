@@ -11,6 +11,10 @@
 #include "../../joueur/src/base_ai.hpp"
 #include "../../joueur/src/attr_wrapper.hpp"
 
+#include "ai_move.hpp"
+//#include "ai_board.hpp"
+#include "ai_tile.hpp"
+
 // You can add additional #includes here
 
 namespace cpp_client
@@ -36,6 +40,10 @@ public:
     Player player;
 
     // You can add additional class variables here.
+  
+  //Maybe create board here.
+  
+  
 
     /// <summary>
     /// This returns your AI's name to the game server.
@@ -76,6 +84,18 @@ public:
     void print_current_board();
 
     // You can add additional methods here.
+  
+  //Returns the game board.
+  std::vector< std::vector<tile> >  getBoard();
+  
+  //Returns a vector of all possible moves.
+  std::vector<ai_move> action(std::vector< std::vector<tile> >  board);
+  
+  //Returns vector of all possible moves the given piece can make.
+  std::vector<ai_move> get_Move(chess::Piece& toMove, int numPiece, std::vector< std::vector<tile> >  board);
+  
+  //Returns true if the given move on the given board does not put my king in check.
+  bool valid_move(chess::ai_move nextMove, std::vector< std::vector<tile> > board);
 
 
 
