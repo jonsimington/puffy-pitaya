@@ -96,9 +96,22 @@ public:
   
   //Returns true if the given move on the given board does not put my king in check.
   bool valid_move(chess::ai_move nextMove, std::vector< std::vector<tile> > board);
-
-
-
+  
+  //Pawn movement function.
+  std::vector<ai_move> pawn_movement(chess::Piece& toMove, int numPiece, int numFile, int rank, std::vector< std::vector<tile> >  board);
+  
+  //Bishop movement function.
+  std::vector<ai_move> bishop_movement(chess::Piece& toMove, int numPiece, int numFile, int rank, std::vector< std::vector<tile> >  board);
+  
+  //Rook movement function.
+  std::vector<ai_move> rook_movement(chess::Piece& toMove, int numPiece, int numFile, int rank, std::vector< std::vector<tile> >  board);
+  
+  //Knight movement function.
+  std::vector<ai_move> knight_movement(chess::Piece& toMove, int numPiece, int numFile, int rank, std::vector< std::vector<tile> >  board);
+  
+  //King movement function.
+  std::vector<ai_move> king_movement(chess::Piece& toMove, int numPiece, int numFile, int rank, std::vector< std::vector<tile> >  board);
+  
     // ####################
     // Don't edit these!
     // ####################

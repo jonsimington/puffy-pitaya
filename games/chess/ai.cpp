@@ -55,48 +55,26 @@ void AI::ended(bool won, const std::string& reason)
 /// <returns>Represents if you want to end your turn. True means end your turn, False means to keep your turn going and re-call this function.</returns>
 bool AI::run_turn()
 {
-    // Here is where you'll want to code your AI.
-
-  /*
-    // We've provided sample code that:
-    //    1) prints the board to the console
-    //    2) prints the opponent's last move to the console
-    //    3) prints how much time remaining this AI has to calculate moves
-    //    4) makes a random (and probably invalid) move.
-
-    // 1) print the board to the console
-    print_current_board();
-
-    // 2) print the opponent's last move to the console
-    if(game->moves.size() > 0)
-    {
-        std::cout << "Opponent's Last Move: '" << game->moves[game->moves.size() - 1]->san << "'" << std::endl;
-    }
-
-    // 3) print how much time remaining this AI has to calculate moves
-    std::cout << "Time Remaining: " << player->time_remaining << " ns" << std::endl;
-
-    // 4) make a random (and probably invalid) move.
-    chess::Piece random_piece = player->pieces[rand() % player->pieces.size()];
-    std::string random_file(1, 'a' + rand() % 8);
-    int random_rank = (rand() % 8) + 1;
-    random_piece->move(random_file, random_rank);
+  // Here is where you'll want to code your AI.
   
-  */
+  //Variable Declaration:
   std::vector< std::vector<tile> >  gameBoard;
   std::vector<ai_move> allMoves;
   int randNum;
   
-  
+  //Get a copy of the gameboard for the current turn.
   gameBoard = getBoard();
   
+  //Get all the possible moves for this turn.
   allMoves = action(gameBoard);
   
+  //Get a random number for picking the move.
   randNum = (rand() % allMoves.size());
   
   //Print out starting position of piece to move.
-  std::cout<<player -> pieces[allMoves[randNum].piece_moved] -> type<<" "<<player -> pieces[allMoves[randNum].piece_moved] -> file<<player -> pieces[allMoves[randNum].piece_moved] -> rank<<" :";
+  std::cout<<player -> pieces[allMoves[randNum].piece_moved] -> type<<" "<<player -> pieces[allMoves[randNum].piece_moved] -> file<<player -> pieces[allMoves[randNum].piece_moved] -> rank<<": ";
   
+  //Make the move selected by the random number.
   player -> pieces[allMoves[randNum].piece_moved] -> move(allMoves[randNum].destination_file, allMoves[randNum].destination_rank, "Queen");
   
   //Print out all possible moves for the piece that was moved.
@@ -181,6 +159,7 @@ void AI::print_current_board()
 //Returns the current state of the chess board.
 std::vector< std::vector<tile> >  AI::getBoard()
 {
+  //Variable Declaration:
   std::vector< std::vector<tile> > tempBoard;
   std::vector<tile> tempRank;
   tile tempTile;
@@ -280,6 +259,7 @@ std::vector< std::vector<tile> >  AI::getBoard()
 //Returns a vector of all possible moves.
 std::vector<ai_move> AI::action(std::vector< std::vector<tile> >  board)
 {
+  //Variable Declaration:
   std::vector<ai_move> allMoves;
   std::vector<ai_move> tempMoves;
   ai_move temp;
@@ -301,7 +281,9 @@ std::vector<ai_move> AI::action(std::vector< std::vector<tile> >  board)
 //Returns vector of all possible moves the given piece can make.
 std::vector<ai_move> AI::get_Move(chess::Piece& toMove, int numPiece, std::vector< std::vector<tile> >  board)
 {
+  //Variable Declaration:
   std::vector<ai_move> moves_Got;
+  std::vector<ai_move> tempMoves;
   ai_move temp;
   int numFile;
   int rank;
@@ -335,62 +317,11 @@ std::vector<ai_move> AI::get_Move(chess::Piece& toMove, int numPiece, std::vecto
   ////////////////////////////////////
   
   if (toMove->type == "Pawn") {
+    tempMoves.clear();
     
-    //If forward move is legal.
-    if (board[toMove->rank + player->rank_direction][numFile].isOccupied == false) {
-      temp.destination_file = toMove->file;
-      temp.destination_rank = (toMove->rank + player->rank_direction);
-      //temp.piece_moved = &toMove;
-      temp.piece_moved = numPiece;
-      
-      if (valid_move(temp, board))
-      {
-        moves_Got.push_back(temp);
-      }
+    tempMoves = pawn_movement(toMove, numPiece, numFile, rank, board);
+    moves_Got.insert(moves_Got.end(), tempMoves.begin(), tempMoves.end());
     
-    } //Forward move.
-  
-    //If capturing right diagonal is legal.
-    if (numFile + 1 <= 8) {
-      if (board[toMove->rank + player->rank_direction][numFile + 1].isOccupied == true) {
-        if (board[toMove->rank + player->rank_direction][numFile + 1].owner != player->color) {
-          temp.destination_file = ('a' + numFile);
-          temp.destination_rank = (toMove->rank + player->rank_direction);
-          temp.piece_moved = numPiece;
-  
-          if (valid_move(temp, board))
-          {
-            moves_Got.push_back(temp);
-          }
-        }
-      
-      }
-    
-    } //Right diagonal.
-  
-    //If capturing left diagonal is legal.
-    if (numFile - 1 > 0) {
-      if (board[toMove->rank + player->rank_direction][numFile - 1].isOccupied == true) {
-        if (board[toMove->rank + player->rank_direction][numFile - 1].owner != player->color) {
-          temp.destination_file = ('a' + numFile - 2);
-          temp.destination_rank = (toMove->rank + player->rank_direction);
-          temp.piece_moved = numPiece;
-  
-          if (valid_move(temp, board))
-          {
-            moves_Got.push_back(temp);
-          }
-        }
-      
-      }
-    
-    } //Left diagonal.
-  
-  
-  
-  
-  
-  
   } //Pawn movement.
   
   ///////////////////////////////////
@@ -398,126 +329,10 @@ std::vector<ai_move> AI::get_Move(chess::Piece& toMove, int numPiece, std::vecto
   ///////////////////////////////////
   
   if (toMove->type == "Rook") {
-    bool done;
-    done = false;
+    tempMoves.clear();
     
-    //Positive rank movement.
-    for (int i = rank + 1; i <= 8; i++) {
-      if (board[i][numFile].isOccupied == true && done == false) {
-        if (board[i][numFile].owner == player->opponent->color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = i;
-          temp.destination_file = toMove -> file;
-          
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-          
-        }
-        
-        done = true;
-      } else if (done == false) {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = i;
-        temp.destination_file = toMove -> file;
-  
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-  
-      }
-      
-    } //Positive Rank Movement.
-    
-    done = false;
-    
-    //Negative rank movement.
-    for (int i = rank - 1; i > 0; i--) {
-      if (board[i][numFile].isOccupied == true && done == false) {
-        if (board[i][numFile].owner == player->opponent->color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = i;
-          temp.destination_file = toMove -> file;
-      
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-      
-        }
-    
-        done = true;
-      } else if (done == false) {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = i;
-        temp.destination_file = toMove -> file;
-  
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-  
-      }
-      
-    } // Negative Rank Movement.
-    
-    done = false;
-    
-    //Positive file movement.
-    for (int i = numFile + 1; i <= 8; i++) {
-      if (board[rank][i].isOccupied == true && done == false) {
-        if (board[rank][i].owner == player->opponent->color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = toMove -> rank;
-          temp.destination_file = ('a' + i - 1);
-      
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-      
-        }
-    
-        done = true;
-      } else if (done == false) {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = toMove -> rank;
-        temp.destination_file = ('a' + i - 1);
-  
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-  
-      }
-      
-    } //Positive File Movement.
-    
-    done = false;
-    
-    //Negative file movement.
-    for (int i = numFile - 1; i > 0; i--) {
-      if (board[rank][i].isOccupied == true && done == false) {
-        if (board[rank][i].owner == player->opponent->color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = toMove -> rank;
-          temp.destination_file = ('a' + i - 1);
-      
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-      
-        }
-    
-        done = true;
-      } else if (done == false) {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = toMove -> rank;
-        temp.destination_file = ('a' + i - 1);
-  
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-  
-      }
-      
-    } //Negative File Movement.
+    tempMoves = rook_movement(toMove, numPiece, numFile, rank, board);
+    moves_Got.insert(moves_Got.end(), tempMoves.begin(), tempMoves.end());
     
   } //Rook Movement.
   
@@ -526,144 +341,10 @@ std::vector<ai_move> AI::get_Move(chess::Piece& toMove, int numPiece, std::vecto
   /////////////////////////////////////
   
   if (toMove->type == "Bishop") {
-    bool done;
-    int diagMoves;
+    tempMoves.clear();
     
-    //Check 1st quadrant diagonal.
-    done = false;
-    if (rank > numFile) {
-      diagMoves = (8 - rank);
-    } else {
-      diagMoves = (8 - numFile);
-    }
-    for (int i = 1; i <= diagMoves; i++) {
-      if (board[rank + i][numFile + i].isOccupied && done == false) {
-        if (board[rank + i][numFile + i].owner == player -> opponent -> color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank + i;
-          temp.destination_file = ('a' + numFile - 1 + i);
-  
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-          
-        }
-      
-        done = true;
-      } else if (done == false) {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank + i;
-        temp.destination_file = ('a' + numFile - 1 + i);
-  
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-        
-      }
-    
-    } //1st Quadrant Diagonal
-    
-    //Check 2nd quadrant diagonal.
-    done = false;
-    if ((8 - rank) < numFile) {
-      diagMoves = (8 - rank);
-    } else {
-      diagMoves = (numFile - 1);
-    }
-    for (int i = 1; i <= diagMoves; i++) {
-      if (board[rank + i][numFile - i].isOccupied && done == false) {
-        if (board[rank + i][numFile - i].owner == player->opponent->color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank + i;
-          temp.destination_file = ('a' + numFile - 1 - i);
-      
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-          
-        }
-    
-        done = true;
-      } else if (done == false) {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank + i;
-        temp.destination_file = ('a' + numFile - 1 - i);
-    
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-    
-      }
-  
-    } //2nd Quadrant Diagonal
-    
-    //Check 3rd quadrant diagonal.
-    done = false;
-    if (rank > numFile) {
-      diagMoves = (numFile - 1);
-    } else {
-      diagMoves = (rank - 1);
-    }
-    for (int i = 1; i <= diagMoves; i++) {
-      if (board[rank - i][numFile - i].isOccupied && done == false) {
-        if (board[rank - i][numFile - i].owner == player -> opponent -> color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank - i;
-          temp.destination_file = ('a' + numFile - 1 - i);
-  
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-        
-        }
-      
-        done = true;
-      } else if (done == false) {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank - i;
-        temp.destination_file = ('a' + numFile - 1 - i);
-  
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-  
-      }
-    
-    } //3rd Quadrant Diagonal.
-  
-    //Check 4th quadrant diagonal.
-    done = false;
-    if (numFile <= (8 - rank)) {
-      diagMoves = (rank - 1);
-    } else {
-      diagMoves = (8 - numFile);
-    }
-    for (int i = 1; i <= diagMoves; i++) {
-      if (board[rank - i][numFile + i].isOccupied && done == false) {
-        if (board[rank - i][numFile + i].owner == player -> opponent -> color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank - i;
-          temp.destination_file = ('a' + numFile - 1 + i);
-  
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-        
-        }
-      
-        done = true;
-      } else if (done == false) {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank - i;
-        temp.destination_file = ('a' + numFile - 1 + i);
-  
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-  
-      }
-    
-    } //4th Quadrant Diagonal.
+    tempMoves = bishop_movement(toMove, numPiece, numFile, rank, board);
+    moves_Got.insert(moves_Got.end(), tempMoves.begin(), tempMoves.end());
     
   } //Bishop Movement.
   
@@ -672,227 +353,10 @@ std::vector<ai_move> AI::get_Move(chess::Piece& toMove, int numPiece, std::vecto
   /////////////////////////////////////
   
   if (toMove->type == "Knight") {
-    //+1 +2
-    if (rank + 1 <= 8 && numFile + 2 <= 8) {
-      if (board[rank + 1][numFile + 2].isOccupied) {
-        if (board[rank + 1][numFile + 2].owner == player->opponent->color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank + 1;
-          temp.destination_file = 'a' + numFile - 1 + 2;
-  
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-          
-        }
-      
-      } else {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank + 1;
-        temp.destination_file = 'a' + numFile - 1 + 2;
-  
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-        
-      }
+    tempMoves.clear();
     
-    }
-  
-    //+2 +1
-    if (rank + 2 <= 8 && numFile + 1 <= 8) {
-      if (board[rank + 2][numFile + 1].isOccupied) {
-        if (board[rank + 2][numFile + 1].owner == player->opponent->color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank + 2;
-          temp.destination_file = 'a' + numFile - 1 + 1;
-  
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-          
-          
-        }
-      
-      } else {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank + 2;
-        temp.destination_file = 'a' + numFile - 1 + 1;
-  
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-        
-      }
-    
-    }
-  
-    //+1 -2
-    if (rank + 1 <= 8 && numFile - 2 > 0) {
-      if (board[rank + 1][numFile - 2].isOccupied) {
-        if (board[rank + 1][numFile - 2].owner == player->opponent->color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank + 1;
-          temp.destination_file = 'a' + numFile - 1 - 2;
-  
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-          
-        }
-      
-      } else {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank + 1;
-        temp.destination_file = 'a' + numFile - 1 - 2;
-  
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-        
-      }
-    
-    }
-  
-    //+2 -1
-    if (rank + 2 <= 8 && numFile - 1 > 0) {
-      if (board[rank + 2][numFile - 1].isOccupied) {
-        if (board[rank + 2][numFile - 1].owner == player->opponent->color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank + 2;
-          temp.destination_file = 'a' + numFile - 1 - 1;
-  
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-          
-          
-        }
-      
-      } else {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank + 2;
-        temp.destination_file = 'a' + numFile - 1 - 1;
-  
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-  
-      }
-    
-    }
-  
-    //-1 -2
-    if (rank - 1 > 0 && numFile - 2 > 0) {
-      if (board[rank - 1][numFile - 2].isOccupied) {
-        if (board[rank - 1][numFile - 2].owner == player->opponent->color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank - 1;
-          temp.destination_file = 'a' + numFile - 1 - 2;
-  
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-          
-          
-        }
-      
-      } else {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank - 1;
-        temp.destination_file = 'a' + numFile - 1 - 2;
-  
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-  
-      }
-    
-    }
-  
-    //-2 -1
-    if (rank - 2 > 0 && numFile - 1 > 0) {
-      if (board[rank - 2][numFile - 1].isOccupied) {
-        if (board[rank - 2][numFile - 1].owner == player->opponent->color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank - 2;
-          temp.destination_file = 'a' + numFile - 1 - 1;
-  
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-          
-          
-        }
-      
-      } else {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank - 2;
-        temp.destination_file = 'a' + numFile - 1 - 1;
-  
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-  
-      }
-    
-    }
-  
-    //-1 +2
-    if (rank - 1 > 0 && numFile + 2 <= 8) {
-      if (board[rank - 1][numFile + 2].isOccupied) {
-        if (board[rank - 1][numFile + 2].owner == player->opponent->color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank - 1;
-          temp.destination_file = 'a' + numFile - 1 + 2;
-  
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-          
-          
-        }
-      
-      } else {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank - 1;
-        temp.destination_file = 'a' + numFile - 1 + 2;
-  
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-  
-      }
-    
-    }
-  
-    //-2 +1
-    if (rank - 2 > 0 && numFile + 1 <= 8) {
-      if (board[rank - 2][numFile + 1].isOccupied) {
-        if (board[rank - 2][numFile + 1].owner == player->opponent->color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank - 2;
-          temp.destination_file = 'a' + numFile - 1 + 1;
-  
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-          
-          
-        }
-      
-      } else {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank - 2;
-        temp.destination_file = 'a' + numFile - 1 + 1;
-  
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-  
-      }
-    
-    }
+    tempMoves = knight_movement(toMove, numPiece, numFile, rank, board);
+    moves_Got.insert(moves_Got.end(), tempMoves.begin(), tempMoves.end());
     
   } //Knight Movement.
   
@@ -901,264 +365,15 @@ std::vector<ai_move> AI::get_Move(chess::Piece& toMove, int numPiece, std::vecto
   ////////////////////////////////////
   
   if (toMove->type == "Queen") {
-    bool done;
-    int diagMoves;
-  
-    done = false;
-  
-    //Positive rank movement.
-    for (int i = rank + 1; i <= 8; i++) {
-      if (board[i][numFile].isOccupied == true && done == false) {
-        if (board[i][numFile].owner == player->opponent->color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = i;
-          temp.destination_file = toMove -> file;
-        
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-        
-        }
-      
-        done = true;
-      } else if (done == false) {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = i;
-        temp.destination_file = toMove -> file;
-      
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-      
-      }
+    tempMoves.clear();
     
-    } //Positive Rank Movement.
-  
-    done = false;
-  
-    //Negative rank movement.
-    for (int i = rank - 1; i > 0; i--) {
-      if (board[i][numFile].isOccupied == true && done == false) {
-        if (board[i][numFile].owner == player->opponent->color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = i;
-          temp.destination_file = toMove -> file;
-        
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-        
-        }
-      
-        done = true;
-      } else if (done == false) {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = i;
-        temp.destination_file = toMove -> file;
-      
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-      
-      }
+    tempMoves = rook_movement(toMove, numPiece, numFile, rank, board);
+    moves_Got.insert(moves_Got.end(), tempMoves.begin(), tempMoves.end());
     
-    } // Negative Rank Movement.
-  
-    done = false;
-  
-    //Positive file movement.
-    for (int i = numFile + 1; i <= 8; i++) {
-      if (board[rank][i].isOccupied == true && done == false) {
-        if (board[rank][i].owner == player->opponent->color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = toMove -> rank;
-          temp.destination_file = ('a' + i - 1);
-        
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-        
-        }
-      
-        done = true;
-      } else if (done == false) {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = toMove -> rank;
-        temp.destination_file = ('a' + i - 1);
-      
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-      
-      }
+    tempMoves.clear();
     
-    } //Positive File Movement.
-  
-    done = false;
-  
-    //Negative file movement.
-    for (int i = numFile - 1; i > 0; i--) {
-      if (board[rank][i].isOccupied == true && done == false) {
-        if (board[rank][i].owner == player->opponent->color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = toMove -> rank;
-          temp.destination_file = ('a' + i - 1);
-        
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-        
-        }
-      
-        done = true;
-      } else if (done == false) {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = toMove -> rank;
-        temp.destination_file = ('a' + i - 1);
-      
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-      
-      }
-    
-    } //Negative File Movement.
-  
-    //Check 1st quadrant diagonal.
-    done = false;
-    if (rank > numFile) {
-      diagMoves = (8 - rank);
-    } else {
-      diagMoves = (8 - numFile);
-    }
-    for (int i = 1; i <= diagMoves; i++) {
-      if (board[rank + i][numFile + i].isOccupied && done == false) {
-        if (board[rank + i][numFile + i].owner == player -> opponent -> color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank + i;
-          temp.destination_file = ('a' + numFile - 1 + i);
-        
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-        
-        }
-      
-        done = true;
-      } else if (done == false) {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank + i;
-        temp.destination_file = ('a' + numFile - 1 + i);
-      
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-      
-      }
-    
-    } //1st Quadrant Diagonal
-  
-    //Check 2nd quadrant diagonal.
-    done = false;
-    if ((8 - rank) < numFile) {
-      diagMoves = (8 - rank);
-    } else {
-      diagMoves = (numFile - 1);
-    }
-    for (int i = 1; i <= diagMoves; i++) {
-      if (board[rank + i][numFile - i].isOccupied && done == false) {
-        if (board[rank + i][numFile - i].owner == player->opponent->color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank + i;
-          temp.destination_file = ('a' + numFile - 1 - i);
-        
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-        
-        }
-      
-        done = true;
-      } else if (done == false) {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank + i;
-        temp.destination_file = ('a' + numFile - 1 - i);
-      
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-      
-      }
-    
-    } //2nd Quadrant Diagonal
-  
-    //Check 3rd quadrant diagonal.
-    done = false;
-    if (rank > numFile) {
-      diagMoves = (numFile - 1);
-    } else {
-      diagMoves = (rank - 1);
-    }
-    for (int i = 1; i <= diagMoves; i++) {
-      if (board[rank - i][numFile - i].isOccupied && done == false) {
-        if (board[rank - i][numFile - i].owner == player -> opponent -> color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank - i;
-          temp.destination_file = ('a' + numFile - 1 - i);
-        
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-        
-        }
-      
-        done = true;
-      } else if (done == false) {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank - i;
-        temp.destination_file = ('a' + numFile - 1 - i);
-      
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-      
-      }
-    
-    } //3rd Quadrant Diagonal.
-  
-    //Check 4th quadrant diagonal.
-    done = false;
-    if (numFile <= (8 - rank)) {
-      diagMoves = (rank - 1);
-    } else {
-      diagMoves = (8 - numFile);
-    }
-    for (int i = 1; i <= diagMoves; i++) {
-      if (board[rank - i][numFile + i].isOccupied && done == false) {
-        if (board[rank - i][numFile + i].owner == player -> opponent -> color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank - i;
-          temp.destination_file = ('a' + numFile - 1 + i);
-        
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-        
-        }
-      
-        done = true;
-      } else if (done == false) {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank - i;
-        temp.destination_file = ('a' + numFile - 1 + i);
-      
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-      
-      }
-    
-    } //4th Quadrant Diagonal.
+    tempMoves = bishop_movement(toMove, numPiece, numFile, rank, board);
+    moves_Got.insert(moves_Got.end(), tempMoves.begin(), tempMoves.end());
     
   } //Queen Movement.
   
@@ -1167,221 +382,10 @@ std::vector<ai_move> AI::get_Move(chess::Piece& toMove, int numPiece, std::vecto
   ///////////////////////////////////
   
   if (toMove->type == "King") {
-    //+1 +0
-    if (rank + 1 <= 8) {
-      if (board[rank + 1][numFile ].isOccupied == true) {
-        if (board[rank + 1][numFile ].owner == player -> opponent -> color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank + 1;
-          temp.destination_file = ('a' + numFile - 1 );
-  
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-          
-        }
-        
-      } else {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank + 1;
-        temp.destination_file = ('a' + numFile - 1 );
-  
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-        
-      }
-      
-    }
+    tempMoves.clear();
     
-    //-1 +0
-    if (rank - 1 > 0) {
-      if (board[rank - 1][numFile ].isOccupied == true) {
-        if (board[rank - 1][numFile ].owner == player -> opponent -> color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank - 1;
-          temp.destination_file = ('a' + numFile - 1 );
-        
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-        
-        }
-      
-      } else {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank - 1;
-        temp.destination_file = ('a' + numFile - 1 );
-      
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-      
-      }
-    
-    }
-    
-    //+0 +1
-    if (numFile + 1 <= 8) {
-      if (board[rank ][numFile + 1].isOccupied == true) {
-        if (board[rank ][numFile + 1].owner == player -> opponent -> color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank ;
-          temp.destination_file = ('a' + numFile - 1 + 1);
-        
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-        
-        }
-      
-      } else {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank ;
-        temp.destination_file = ('a' + numFile - 1 + 1);
-      
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-      
-      }
-    
-    }
-    
-    //+0 -1
-    if (numFile - 1 > 0) {
-      if (board[rank ][numFile - 1].isOccupied == true) {
-        if (board[rank ][numFile - 1].owner == player -> opponent -> color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank ;
-          temp.destination_file = ('a' + numFile - 1 - 1);
-        
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-        
-        }
-      
-      } else {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank ;
-        temp.destination_file = ('a' + numFile - 1 - 1);
-      
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-      
-      }
-    
-    }
-    
-    //+1 +1
-    if (rank + 1 <= 8 && numFile + 1 <= 8) {
-      if (board[rank + 1][numFile + 1].isOccupied == true) {
-        if (board[rank + 1][numFile + 1].owner == player -> opponent -> color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank + 1;
-          temp.destination_file = ('a' + numFile - 1 + 1);
-        
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-        
-        }
-      
-      } else {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank + 1;
-        temp.destination_file = ('a' + numFile - 1 + 1);
-      
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-      
-      }
-    
-    }
-    
-    //+1 -1
-    if (rank + 1 <= 8 && numFile - 1 > 0) {
-      if (board[rank + 1][numFile - 1].isOccupied == true) {
-        if (board[rank + 1][numFile - 1].owner == player -> opponent -> color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank + 1;
-          temp.destination_file = ('a' + numFile - 1 - 1);
-        
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-        
-        }
-      
-      } else {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank + 1;
-        temp.destination_file = ('a' + numFile - 1 - 1);
-      
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-      
-      }
-    
-    }
-    
-    //-1 -1
-    if (rank - 1 > 0 && numFile - 1 > 0) {
-      if (board[rank - 1][numFile - 1].isOccupied == true) {
-        if (board[rank - 1][numFile - 1].owner == player -> opponent -> color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank - 1;
-          temp.destination_file = ('a' + numFile - 1 - 1);
-        
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-        
-        }
-      
-      } else {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank - 1;
-        temp.destination_file = ('a' + numFile - 1 - 1);
-      
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-      
-      }
-    
-    }
-    
-    //-1 +1
-    if (rank - 1 > 0 && numFile + 1 <= 8) {
-      if (board[rank - 1][numFile + 1].isOccupied == true) {
-        if (board[rank - 1][numFile + 1].owner == player -> opponent -> color) {
-          temp.piece_moved = numPiece;
-          temp.destination_rank = rank - 1;
-          temp.destination_file = ('a' + numFile - 1 + 1);
-        
-          if (valid_move(temp, board)) {
-            moves_Got.push_back(temp);
-          }
-        
-        }
-      
-      } else {
-        temp.piece_moved = numPiece;
-        temp.destination_rank = rank - 1;
-        temp.destination_file = ('a' + numFile - 1 + 1);
-      
-        if (valid_move(temp, board)) {
-          moves_Got.push_back(temp);
-        }
-      
-      }
-    
-    }
+    tempMoves = king_movement(toMove, numPiece, numFile, rank, board);
+    moves_Got.insert(moves_Got.end(), tempMoves.begin(), tempMoves.end());
     
   } //King Movement.
   
@@ -1851,6 +855,815 @@ bool AI::valid_move(chess::ai_move nextMove, std::vector< std::vector<tile> > bo
   //Return value of valid
   return valid;
 } //Valid Move Function.
+    
+std::vector<ai_move> AI::pawn_movement(chess::Piece& toMove, int numPiece, int numFile, int rank, std::vector< std::vector<tile> >  board) {
+  //Variable Declaration:
+  ai_move temp;
+  std::vector<ai_move> moves_Got;
+  
+  //If forward move is legal.
+  if (board[toMove->rank + player->rank_direction][numFile].isOccupied == false) {
+    temp.destination_file = toMove->file;
+    temp.destination_rank = (toMove->rank + player->rank_direction);
+    temp.piece_moved = numPiece;
+    
+    if (valid_move(temp, board))
+    {
+      moves_Got.push_back(temp);
+    }
+    
+  } //Forward move.
+  
+  //If double forward move is legal.
+  if ( ( (player -> rank_direction > 0) && (rank == 2) ) || ( (player -> rank_direction < 0) && (rank == 7) ) ) {
+    if ((board[toMove->rank + (player->rank_direction * 2)][numFile].isOccupied == false) && (board[toMove->rank + player->rank_direction][numFile].isOccupied == false)) {
+      temp.destination_file = toMove->file;
+      temp.destination_rank = (toMove->rank + (player->rank_direction * 2));
+      temp.piece_moved = numPiece;
+  
+      if (valid_move(temp, board))
+      {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  } //Double Forward Move.
+  
+  //If capturing right diagonal is legal.
+  if (numFile + 1 <= 8) {
+    if (board[toMove->rank + player->rank_direction][numFile + 1].isOccupied == true) {
+      if (board[toMove->rank + player->rank_direction][numFile + 1].owner != player->color) {
+        temp.destination_file = ('a' + numFile);
+        temp.destination_rank = (toMove->rank + player->rank_direction);
+        temp.piece_moved = numPiece;
+        
+        if (valid_move(temp, board))
+        {
+          moves_Got.push_back(temp);
+        }
+      }
+      
+    }
+    
+  } //Right diagonal.
+  
+  //If capturing left diagonal is legal.
+  if (numFile - 1 > 0) {
+    if (board[toMove->rank + player->rank_direction][numFile - 1].isOccupied == true) {
+      if (board[toMove->rank + player->rank_direction][numFile - 1].owner != player->color) {
+        temp.destination_file = ('a' + numFile - 2);
+        temp.destination_rank = (toMove->rank + player->rank_direction);
+        temp.piece_moved = numPiece;
+        
+        if (valid_move(temp, board))
+        {
+          moves_Got.push_back(temp);
+        }
+      }
+      
+    }
+    
+  } //Left diagonal.
+  
+  return moves_Got;
+}
+
+std::vector<ai_move> AI::bishop_movement(chess::Piece& toMove, int numPiece, int numFile, int rank, std::vector< std::vector<tile> >  board) {
+  //Variable Declaration:
+  ai_move temp;
+  std::vector<ai_move> moves_Got;
+  bool done;
+  int diagMoves;
+  
+  //Check 1st quadrant diagonal.
+  done = false;
+  if (rank > numFile) {
+    diagMoves = (8 - rank);
+  } else {
+    diagMoves = (8 - numFile);
+  }
+  for (int i = 1; i <= diagMoves; i++) {
+    if (board[rank + i][numFile + i].isOccupied && done == false) {
+      if (board[rank + i][numFile + i].owner == player -> opponent -> color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = rank + i;
+        temp.destination_file = ('a' + numFile - 1 + i);
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+      }
+      
+      done = true;
+    } else if (done == false) {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = rank + i;
+      temp.destination_file = ('a' + numFile - 1 + i);
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  } //1st Quadrant Diagonal
+  
+  //Check 2nd quadrant diagonal.
+  done = false;
+  if ((8 - rank) < numFile) {
+    diagMoves = (8 - rank);
+  } else {
+    diagMoves = (numFile - 1);
+  }
+  for (int i = 1; i <= diagMoves; i++) {
+    if (board[rank + i][numFile - i].isOccupied && done == false) {
+      if (board[rank + i][numFile - i].owner == player->opponent->color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = rank + i;
+        temp.destination_file = ('a' + numFile - 1 - i);
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+      }
+      
+      done = true;
+    } else if (done == false) {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = rank + i;
+      temp.destination_file = ('a' + numFile - 1 - i);
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  } //2nd Quadrant Diagonal
+  
+  //Check 3rd quadrant diagonal.
+  done = false;
+  if (rank > numFile) {
+    diagMoves = (numFile - 1);
+  } else {
+    diagMoves = (rank - 1);
+  }
+  for (int i = 1; i <= diagMoves; i++) {
+    if (board[rank - i][numFile - i].isOccupied && done == false) {
+      if (board[rank - i][numFile - i].owner == player -> opponent -> color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = rank - i;
+        temp.destination_file = ('a' + numFile - 1 - i);
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+      }
+      
+      done = true;
+    } else if (done == false) {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = rank - i;
+      temp.destination_file = ('a' + numFile - 1 - i);
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  } //3rd Quadrant Diagonal.
+  
+  //Check 4th quadrant diagonal.
+  done = false;
+  if (numFile <= (8 - rank)) {
+    diagMoves = (rank - 1);
+  } else {
+    diagMoves = (8 - numFile);
+  }
+  for (int i = 1; i <= diagMoves; i++) {
+    if (board[rank - i][numFile + i].isOccupied && done == false) {
+      if (board[rank - i][numFile + i].owner == player -> opponent -> color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = rank - i;
+        temp.destination_file = ('a' + numFile - 1 + i);
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+      }
+      
+      done = true;
+    } else if (done == false) {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = rank - i;
+      temp.destination_file = ('a' + numFile - 1 + i);
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  } //4th Quadrant Diagonal.
+  
+  
+  
+  return moves_Got;
+}
+
+std::vector<ai_move> AI::rook_movement(chess::Piece& toMove, int numPiece, int numFile, int rank, std::vector< std::vector<tile> >  board) {
+  //Variable Declaration:
+  ai_move temp;
+  std::vector<ai_move> moves_Got;
+  bool done;
+  done = false;
+  
+  //Positive rank movement.
+  for (int i = rank + 1; i <= 8; i++) {
+    if (board[i][numFile].isOccupied == true && done == false) {
+      if (board[i][numFile].owner == player->opponent->color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = i;
+        temp.destination_file = toMove -> file;
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+      }
+      
+      done = true;
+    } else if (done == false) {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = i;
+      temp.destination_file = toMove -> file;
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  } //Positive Rank Movement.
+  
+  done = false;
+  
+  //Negative rank movement.
+  for (int i = rank - 1; i > 0; i--) {
+    if (board[i][numFile].isOccupied == true && done == false) {
+      if (board[i][numFile].owner == player->opponent->color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = i;
+        temp.destination_file = toMove -> file;
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+      }
+      
+      done = true;
+    } else if (done == false) {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = i;
+      temp.destination_file = toMove -> file;
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  } // Negative Rank Movement.
+  
+  done = false;
+  
+  //Positive file movement.
+  for (int i = numFile + 1; i <= 8; i++) {
+    if (board[rank][i].isOccupied == true && done == false) {
+      if (board[rank][i].owner == player->opponent->color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = toMove -> rank;
+        temp.destination_file = ('a' + i - 1);
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+      }
+      
+      done = true;
+    } else if (done == false) {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = toMove -> rank;
+      temp.destination_file = ('a' + i - 1);
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  } //Positive File Movement.
+  
+  done = false;
+  
+  //Negative file movement.
+  for (int i = numFile - 1; i > 0; i--) {
+    if (board[rank][i].isOccupied == true && done == false) {
+      if (board[rank][i].owner == player->opponent->color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = toMove -> rank;
+        temp.destination_file = ('a' + i - 1);
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+      }
+      
+      done = true;
+    } else if (done == false) {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = toMove -> rank;
+      temp.destination_file = ('a' + i - 1);
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  } //Negative File Movement.
+  
+  
+  
+  return moves_Got;
+}
+
+std::vector<ai_move> AI::knight_movement(chess::Piece& toMove, int numPiece, int numFile, int rank, std::vector< std::vector<tile> >  board) {
+  //Variable Declaration:
+  ai_move temp;
+  std::vector<ai_move> moves_Got;
+  
+  //+1 +2
+  if (rank + 1 <= 8 && numFile + 2 <= 8) {
+    if (board[rank + 1][numFile + 2].isOccupied) {
+      if (board[rank + 1][numFile + 2].owner == player->opponent->color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = rank + 1;
+        temp.destination_file = 'a' + numFile - 1 + 2;
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+      }
+      
+    } else {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = rank + 1;
+      temp.destination_file = 'a' + numFile - 1 + 2;
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  }
+  
+  //+2 +1
+  if (rank + 2 <= 8 && numFile + 1 <= 8) {
+    if (board[rank + 2][numFile + 1].isOccupied) {
+      if (board[rank + 2][numFile + 1].owner == player->opponent->color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = rank + 2;
+        temp.destination_file = 'a' + numFile - 1 + 1;
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+        
+      }
+      
+    } else {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = rank + 2;
+      temp.destination_file = 'a' + numFile - 1 + 1;
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  }
+  
+  //+1 -2
+  if (rank + 1 <= 8 && numFile - 2 > 0) {
+    if (board[rank + 1][numFile - 2].isOccupied) {
+      if (board[rank + 1][numFile - 2].owner == player->opponent->color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = rank + 1;
+        temp.destination_file = 'a' + numFile - 1 - 2;
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+      }
+      
+    } else {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = rank + 1;
+      temp.destination_file = 'a' + numFile - 1 - 2;
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  }
+  
+  //+2 -1
+  if (rank + 2 <= 8 && numFile - 1 > 0) {
+    if (board[rank + 2][numFile - 1].isOccupied) {
+      if (board[rank + 2][numFile - 1].owner == player->opponent->color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = rank + 2;
+        temp.destination_file = 'a' + numFile - 1 - 1;
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+        
+      }
+      
+    } else {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = rank + 2;
+      temp.destination_file = 'a' + numFile - 1 - 1;
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  }
+  
+  //-1 -2
+  if (rank - 1 > 0 && numFile - 2 > 0) {
+    if (board[rank - 1][numFile - 2].isOccupied) {
+      if (board[rank - 1][numFile - 2].owner == player->opponent->color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = rank - 1;
+        temp.destination_file = 'a' + numFile - 1 - 2;
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+        
+      }
+      
+    } else {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = rank - 1;
+      temp.destination_file = 'a' + numFile - 1 - 2;
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  }
+  
+  //-2 -1
+  if (rank - 2 > 0 && numFile - 1 > 0) {
+    if (board[rank - 2][numFile - 1].isOccupied) {
+      if (board[rank - 2][numFile - 1].owner == player->opponent->color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = rank - 2;
+        temp.destination_file = 'a' + numFile - 1 - 1;
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+        
+      }
+      
+    } else {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = rank - 2;
+      temp.destination_file = 'a' + numFile - 1 - 1;
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  }
+  
+  //-1 +2
+  if (rank - 1 > 0 && numFile + 2 <= 8) {
+    if (board[rank - 1][numFile + 2].isOccupied) {
+      if (board[rank - 1][numFile + 2].owner == player->opponent->color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = rank - 1;
+        temp.destination_file = 'a' + numFile - 1 + 2;
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+        
+      }
+      
+    } else {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = rank - 1;
+      temp.destination_file = 'a' + numFile - 1 + 2;
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  }
+  
+  //-2 +1
+  if (rank - 2 > 0 && numFile + 1 <= 8) {
+    if (board[rank - 2][numFile + 1].isOccupied) {
+      if (board[rank - 2][numFile + 1].owner == player->opponent->color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = rank - 2;
+        temp.destination_file = 'a' + numFile - 1 + 1;
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+        
+      }
+      
+    } else {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = rank - 2;
+      temp.destination_file = 'a' + numFile - 1 + 1;
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  }
+  
+  
+  return moves_Got;
+}
+
+std::vector<ai_move> AI::king_movement(chess::Piece& toMove, int numPiece, int numFile, int rank, std::vector< std::vector<tile> >  board) {
+  //Variable Declaration:
+  ai_move temp;
+  std::vector<ai_move> moves_Got;
+  
+  //+1 +0
+  if (rank + 1 <= 8) {
+    if (board[rank + 1][numFile ].isOccupied == true) {
+      if (board[rank + 1][numFile ].owner == player -> opponent -> color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = rank + 1;
+        temp.destination_file = ('a' + numFile - 1 );
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+      }
+      
+    } else {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = rank + 1;
+      temp.destination_file = ('a' + numFile - 1 );
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  }
+  
+  //-1 +0
+  if (rank - 1 > 0) {
+    if (board[rank - 1][numFile ].isOccupied == true) {
+      if (board[rank - 1][numFile ].owner == player -> opponent -> color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = rank - 1;
+        temp.destination_file = ('a' + numFile - 1 );
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+      }
+      
+    } else {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = rank - 1;
+      temp.destination_file = ('a' + numFile - 1 );
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  }
+  
+  //+0 +1
+  if (numFile + 1 <= 8) {
+    if (board[rank ][numFile + 1].isOccupied == true) {
+      if (board[rank ][numFile + 1].owner == player -> opponent -> color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = rank ;
+        temp.destination_file = ('a' + numFile - 1 + 1);
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+      }
+      
+    } else {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = rank ;
+      temp.destination_file = ('a' + numFile - 1 + 1);
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  }
+  
+  //+0 -1
+  if (numFile - 1 > 0) {
+    if (board[rank ][numFile - 1].isOccupied == true) {
+      if (board[rank ][numFile - 1].owner == player -> opponent -> color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = rank ;
+        temp.destination_file = ('a' + numFile - 1 - 1);
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+      }
+      
+    } else {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = rank ;
+      temp.destination_file = ('a' + numFile - 1 - 1);
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  }
+  
+  //+1 +1
+  if (rank + 1 <= 8 && numFile + 1 <= 8) {
+    if (board[rank + 1][numFile + 1].isOccupied == true) {
+      if (board[rank + 1][numFile + 1].owner == player -> opponent -> color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = rank + 1;
+        temp.destination_file = ('a' + numFile - 1 + 1);
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+      }
+      
+    } else {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = rank + 1;
+      temp.destination_file = ('a' + numFile - 1 + 1);
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  }
+  
+  //+1 -1
+  if (rank + 1 <= 8 && numFile - 1 > 0) {
+    if (board[rank + 1][numFile - 1].isOccupied == true) {
+      if (board[rank + 1][numFile - 1].owner == player -> opponent -> color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = rank + 1;
+        temp.destination_file = ('a' + numFile - 1 - 1);
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+      }
+      
+    } else {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = rank + 1;
+      temp.destination_file = ('a' + numFile - 1 - 1);
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  }
+  
+  //-1 -1
+  if (rank - 1 > 0 && numFile - 1 > 0) {
+    if (board[rank - 1][numFile - 1].isOccupied == true) {
+      if (board[rank - 1][numFile - 1].owner == player -> opponent -> color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = rank - 1;
+        temp.destination_file = ('a' + numFile - 1 - 1);
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+      }
+      
+    } else {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = rank - 1;
+      temp.destination_file = ('a' + numFile - 1 - 1);
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  }
+  
+  //-1 +1
+  if (rank - 1 > 0 && numFile + 1 <= 8) {
+    if (board[rank - 1][numFile + 1].isOccupied == true) {
+      if (board[rank - 1][numFile + 1].owner == player -> opponent -> color) {
+        temp.piece_moved = numPiece;
+        temp.destination_rank = rank - 1;
+        temp.destination_file = ('a' + numFile - 1 + 1);
+        
+        if (valid_move(temp, board)) {
+          moves_Got.push_back(temp);
+        }
+        
+      }
+      
+    } else {
+      temp.piece_moved = numPiece;
+      temp.destination_rank = rank - 1;
+      temp.destination_file = ('a' + numFile - 1 + 1);
+      
+      if (valid_move(temp, board)) {
+        moves_Got.push_back(temp);
+      }
+      
+    }
+    
+  }
+  
+  
+  
+  
+  return moves_Got;
+}
     
 } // chess
 
