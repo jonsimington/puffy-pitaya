@@ -1,0 +1,1 @@
+This was compiled on a linux machine with the 'make' command, and was executed with the ./testRun command.

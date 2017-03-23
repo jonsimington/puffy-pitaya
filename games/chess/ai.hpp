@@ -12,7 +12,7 @@
 #include "../../joueur/src/attr_wrapper.hpp"
 
 #include "ai_move.hpp"
-//#include "ai_board.hpp"
+#include "ai_piece.hpp"
 #include "ai_tile.hpp"
 
 // You can add additional #includes here
@@ -42,7 +42,7 @@ public:
     // You can add additional class variables here.
   
   //Maybe create board here.
-  
+  int depthLimit;
   
 
     /// <summary>
@@ -89,28 +89,48 @@ public:
   std::vector< std::vector<tile> >  getBoard();
   
   //Returns a vector of all possible moves.
-  std::vector<ai_move> action(std::vector< std::vector<tile> >  board);
+  std::vector<ai_move> action(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, std::vector< std::vector<tile> >  board,
+                              std::string myColor, std::string oppColor, int rankDir);
   
   //Returns vector of all possible moves the given piece can make.
-  std::vector<ai_move> get_Move(chess::Piece& toMove, int numPiece, std::vector< std::vector<tile> >  board);
+  std::vector<ai_move> get_Move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, ai_piece toMove, int numPiece,
+                                std::vector< std::vector<tile> >  board, std::string myColor, std::string oppColor, int rankDir);
   
   //Returns true if the given move on the given board does not put my king in check.
-  bool valid_move(chess::ai_move nextMove, std::vector< std::vector<tile> > board);
+  bool valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, chess::ai_move nextMove, std::vector< std::vector<tile> > board,
+                  std::string myColor, std::string oppColor, int rankDir);
   
   //Pawn movement function.
-  std::vector<ai_move> pawn_movement(chess::Piece& toMove, int numPiece, int numFile, int rank, std::vector< std::vector<tile> >  board);
+  std::vector<ai_move> pawn_movement(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, ai_piece toMove, int numPiece, int numFile, int rank,
+                                     std::vector< std::vector<tile> >  board, std::string myColor, std::string oppColor, int rankDir);
   
   //Bishop movement function.
-  std::vector<ai_move> bishop_movement(chess::Piece& toMove, int numPiece, int numFile, int rank, std::vector< std::vector<tile> >  board);
+  std::vector<ai_move> bishop_movement(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, ai_piece toMove, int numPiece, int numFile, int rank,
+                                       std::vector< std::vector<tile> >  board, std::string myColor, std::string oppColor, int rankDir);
   
   //Rook movement function.
-  std::vector<ai_move> rook_movement(chess::Piece& toMove, int numPiece, int numFile, int rank, std::vector< std::vector<tile> >  board);
+  std::vector<ai_move> rook_movement(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, ai_piece toMove, int numPiece, int numFile, int rank,
+                                     std::vector< std::vector<tile> >  board, std::string myColor, std::string oppColor, int rankDir);
   
   //Knight movement function.
-  std::vector<ai_move> knight_movement(chess::Piece& toMove, int numPiece, int numFile, int rank, std::vector< std::vector<tile> >  board);
+  std::vector<ai_move> knight_movement(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, ai_piece toMove, int numPiece, int numFile, int rank,
+                                       std::vector< std::vector<tile> >  board, std::string myColor, std::string oppColor, int rankDir);
   
   //King movement function.
-  std::vector<ai_move> king_movement(chess::Piece& toMove, int numPiece, int numFile, int rank, std::vector< std::vector<tile> >  board);
+  std::vector<ai_move> king_movement(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, ai_piece toMove, int numPiece, int numFile, int rank,
+                                     std::vector< std::vector<tile> >  board, std::string myColor, std::string oppColor, int rankDir);
+  
+  //MiniMax function.
+  ai_move miniMax(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, int limit, std::vector< std::vector<tile> >  board);
+  
+  //Min value function for minimax.
+  int minVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, int limit, std::vector< std::vector<tile> > board, std::vector<int> myCaptured, std::vector<int> oppCaptured);
+  
+  //Max value function for minimax.
+  int maxVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, int limit, std::vector< std::vector<tile> > board, std::vector<int> myCaptured, std::vector<int> oppCaptured);
+  
+  //Returns the value of the pieces based on the given board state.
+  int getValue(std::vector< std::vector<tile> > board);
   
     // ####################
     // Don't edit these!

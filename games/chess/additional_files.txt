@@ -3,3 +3,7 @@
 # You would add the following line to this folder (without the #)
 # my_code/stuff.cpp
 # If your build fails after adding files, try to build again
+
+#ai_piece.hpp
+#ai_move.hpp
+#ai_tile.hpp
