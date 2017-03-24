@@ -29,10 +29,12 @@ void AI::start()
 {
     // This is a good place to initialize any variables
     srand(time(NULL));
-  
+  /*
   //Ask user for depth limit.
   std::cout<<"Please enter a depth limit for ID DLM."<<std::endl;
   std::cin>>depthLimit;
+   */
+  depthLimit = 4;
 }
 
 /// <summary>
