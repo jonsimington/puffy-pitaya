@@ -42,8 +42,10 @@ public:
     // You can add additional class variables here.
   
   //Maybe create board here.
-  int depthLimit;
   
+  //Variable Declaration:
+  int depthLimit;
+  std::vector<rep_move> previous_moves;
 
     /// <summary>
     /// This returns your AI's name to the game server.
@@ -130,7 +132,10 @@ public:
   int maxVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, int limit, std::vector< std::vector<tile> > board, std::vector<int> myCaptured, std::vector<int> oppCaptured);
   
   //Returns the value of the pieces based on the given board state.
-  int getValue(std::vector< std::vector<tile> > board);
+  int getValue(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, std::vector< std::vector<tile> > board);
+  
+  //Returns true if the given player is in check.
+  bool in_check(std::string myColor, std::string oppColor, std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, std::vector< std::vector<tile> > board, int rankDir);
   
     // ####################
     // Don't edit these!

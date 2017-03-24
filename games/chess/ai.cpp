@@ -71,6 +71,7 @@ bool AI::run_turn()
   std::vector<ai_piece> myPieces;
   std::vector<ai_piece> oppPieces;
   ai_piece tempPiece;
+  rep_move tempMove;
   
   //Populate myPieces and oppPieces.
   myPieces.clear();
@@ -102,9 +103,21 @@ bool AI::run_turn()
   std::cout<<player -> pieces[toMove.piece_moved] -> type<<" "<<player -> pieces[toMove.piece_moved] -> file<<player -> pieces[toMove.piece_moved] -> rank<<" : "
            <<toMove.destination_file<<toMove.destination_rank<<std::endl;
   
+  //Place the move to be made in the vector of previous moves.
+  tempMove.piece_moved = toMove.piece_moved;
+  tempMove.origin_file = player -> pieces[toMove.piece_moved] -> file;
+  tempMove.origin_rank = player -> pieces[toMove.piece_moved] -> rank;
+  tempMove.destination_file = toMove.destination_file;
+  tempMove.destination_rank = toMove.destination_rank;
+  previous_moves.push_back(tempMove);
+  
+  //If size is greater that 3, erase the front (oldest) move.
+  if (previous_moves.size() > 3) {
+    previous_moves.erase(previous_moves.begin());
+  }
+  
   //Make the move selected by MiniMax
   player -> pieces[toMove.piece_moved] -> move(toMove.destination_file, toMove.destination_rank, "Queen");
-  
   
   /*
   //Get all the possible moves for this turn.
@@ -445,7 +458,7 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
   int king;
   int rank;
   int numfile;
-  int destfile;
+  //int destfile;
   int diagMoves;
   bool valid;
   bool done;
@@ -455,7 +468,7 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
   /////////////////////////////////////
   //Apply potential move to the board//
   /////////////////////////////////////
-  
+  /*
   //Get file number for where the piece originates.
   if (myPieces[nextMove.piece_moved].file == "a") {
     numfile = 1;
@@ -503,6 +516,55 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
   board[myPieces[nextMove.piece_moved].rank][numfile].isOccupied = false;
   board[myPieces[nextMove.piece_moved].rank][numfile].owner = "";
   board[myPieces[nextMove.piece_moved].rank][numfile].piece = 0;
+  */
+  
+  //Get file number for where the piece originates.
+  if (myPieces[nextMove.piece_moved].file == "a") {
+    numfile = 1;
+  } else if (myPieces[nextMove.piece_moved].file == "b") {
+    numfile = 2;
+  } else if (myPieces[nextMove.piece_moved].file == "c") {
+    numfile = 3;
+  } else if (myPieces[nextMove.piece_moved].file == "d") {
+    numfile = 4;
+  } else if (myPieces[nextMove.piece_moved].file == "e") {
+    numfile = 5;
+  } else if (myPieces[nextMove.piece_moved].file == "f") {
+    numfile = 6;
+  } else if (myPieces[nextMove.piece_moved].file == "g") {
+    numfile = 7;
+  } else if (myPieces[nextMove.piece_moved].file == "h") {
+    numfile = 8;
+  }
+  
+  //Erase piece from previous location on the board.
+  board[myPieces[nextMove.piece_moved].rank][numfile].isOccupied = false;
+  board[myPieces[nextMove.piece_moved].rank][numfile].owner = "";
+  board[myPieces[nextMove.piece_moved].rank][numfile].piece = 0;
+  
+  //Get file number for where the piece would end up.
+  if (nextMove.destination_file == "a") {
+    numfile = 1;
+  } else if (nextMove.destination_file == "b") {
+    numfile = 2;
+  } else if (nextMove.destination_file == "c") {
+    numfile = 3;
+  } else if (nextMove.destination_file == "d") {
+    numfile = 4;
+  } else if (nextMove.destination_file == "e") {
+    numfile = 5;
+  } else if (nextMove.destination_file == "f") {
+    numfile = 6;
+  } else if (nextMove.destination_file == "g") {
+    numfile = 7;
+  } else if (nextMove.destination_file == "h") {
+    numfile = 8;
+  }
+  
+  //Place piece in new location on board.
+  board[nextMove.destination_rank][numfile].isOccupied = true;
+  board[nextMove.destination_rank][numfile].owner = myColor;
+  board[nextMove.destination_rank][numfile].piece = nextMove.piece_moved;
   
   ///////////////////////////
   //Get King rank and file.//
@@ -1728,17 +1790,36 @@ ai_move AI::miniMax(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
   std::vector<int> myCaptured;
   std::vector<int> oppCaptured;
   std::vector< std::vector<tile> > tempBoard;
+  rep_move tempMove;
+  bool repeat;
   
   //Initialize variables.
   myCaptured.clear();
   oppCaptured.clear();
   maxValue = -100;
+  repeat = false;
   
   //Get all possible moves at this node.
   allMoves = action(myPieces, oppPieces, board, player -> color, player -> opponent -> color, player -> rank_direction);
   
   //Call the minVal function on each move.
   for (int i = 0; i < allMoves.size(); i++) {
+    
+    //
+    tempMove.piece_moved = allMoves[i].piece_moved;
+    tempMove.origin_file = myPieces[allMoves[i].piece_moved].file;
+    tempMove.origin_rank = myPieces[allMoves[i].piece_moved].rank;
+    tempMove.destination_file = allMoves[i].destination_file;
+    tempMove.destination_rank = allMoves[i].destination_rank;
+    repeat = false;
+    
+    for (int j = 0; j < previous_moves.size(); j++) {
+      if ((tempMove.piece_moved == previous_moves[j].piece_moved) && (tempMove.origin_file == myPieces[allMoves[i].piece_moved].file) && (tempMove.origin_rank == myPieces[allMoves[i].piece_moved].rank)
+          && (tempMove.destination_file == allMoves[i].destination_file) && (tempMove.destination_rank == allMoves[i].destination_rank) ) {
+        repeat = true;
+      }
+    }
+    
     
     //////////////////////////////////////////////
     //Create a temp board with the move applied.//
@@ -1806,6 +1887,11 @@ ai_move AI::miniMax(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
     
     //MinVal function call.
     minValue = minVal(myPieces, oppPieces, (limit-1), tempBoard, myCaptured, oppCaptured);
+    
+    //Penalize the move 20 points if it is a repeat one of the last 3 moves.
+    if (repeat) {
+      minValue = minValue - 20;
+    }
     if (minValue > maxValue) {
       maxMove = i;
       maxValue = minValue;
@@ -1837,7 +1923,7 @@ int AI::minVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, 
   
   //If depth limit reached, return the value for the pieces on the board.
   if (limit <= 0) {
-    value = getValue(board);
+    value = getValue(myPieces, oppPieces, board);
     
     return value;
   }
@@ -1941,13 +2027,13 @@ int AI::maxVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, 
   
   //If depth limit reached, return the value for the pieces on the board.
   if (limit <= 0) {
-    value = getValue(board);
+    value = getValue(myPieces, oppPieces, board);
     
     return value;
   }
   
   //Get all possible moves at this node.
-  allMoves = action(myPieces, oppPieces, board, player -> color, player -> opponent -> color, player -> opponent -> rank_direction);
+  allMoves = action(myPieces, oppPieces, board, player -> color, player -> opponent -> color, player -> rank_direction);
   
   //Call the maxVal function on each move.
   for (int i = 0; i < allMoves.size(); i++) {
@@ -2030,7 +2116,7 @@ int AI::maxVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, 
 } //MaxVal Function.
 
 //Returns the value of the given board.
-int AI::getValue(std::vector< std::vector<tile> > board) {
+int AI::getValue(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, std::vector< std::vector<tile> > board) {
   //Variable Declaration:
   int value;
   
@@ -2088,8 +2174,405 @@ int AI::getValue(std::vector< std::vector<tile> > board) {
     
   } //Board iteration.
   
+  //If player is in check, subtract 7 from the score.  If opponent is in check, add 3 to the score.
+  if (in_check(player -> color, player -> opponent -> color, myPieces, oppPieces, board, player -> rank_direction)) {
+    value = value - 7;
+  }
+  if (in_check(player -> opponent -> color, player -> color, oppPieces, myPieces, board, player -> rank_direction)) {
+    value = value + 3;
+  }
+  
   return value;
 } //Get Value Function.
+
+//Returns true if the given player is in check.
+bool AI::in_check(std::string myColor, std::string oppColor, std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, std::vector< std::vector<tile> > board, int rankDir) {
+  //Variable Declaration:
+  int king;
+  int rank;
+  int numfile;
+  int destfile;
+  int diagMoves;
+  bool valid;
+  bool done;
+  
+  valid = true;
+  
+  ///////////////////////////
+  //Get King rank and file.//
+  ///////////////////////////
+  
+  //Find King piece.
+  for (int l = 0; l < myPieces.size(); l++) {
+    if (myPieces[l].type == "King") {
+      king = l;
+    }
+  }
+  
+  //Get rank and file.
+  rank = myPieces[king].rank;
+  
+  if (myPieces[king].file == "a") {
+    numfile = 1;
+  } else if (myPieces[king].file == "b") {
+    numfile = 2;
+  } else if (myPieces[king].file == "c") {
+    numfile = 3;
+  } else if (myPieces[king].file == "d") {
+    numfile = 4;
+  } else if (myPieces[king].file == "e") {
+    numfile = 5;
+  } else if (myPieces[king].file == "f") {
+    numfile = 6;
+  } else if (myPieces[king].file == "g") {
+    numfile = 7;
+  } else if (myPieces[king].file == "h") {
+    numfile = 8;
+  } //Get King rank and file.
+  
+  /////////////////////////////////////////////////////////////////////////////////
+  //Check 4 directions and 4 diagonals to see if a piece places my king in check.//
+  /////////////////////////////////////////////////////////////////////////////////
+  
+  ///////////////////////
+  //Check 4 directions.//
+  ///////////////////////
+  
+  //Check positive rank.
+  done = false;
+  for (int i = (rank+1); i <= 8; i++) {
+    if (board[i][numfile].isOccupied == true && done == false) {
+      if (board[i][numfile].owner == oppColor) {
+        if (i == (rank+1) && oppPieces[board[i][numfile].piece].type == "King") {
+          valid = false;
+        }
+        if (oppPieces[board[i][numfile].piece].type == "Rook" ||
+            oppPieces[board[i][numfile].piece].type == "Queen") {
+          valid = false;
+        }
+        
+      }
+      
+      done = true;
+    }
+    
+  } //Positive rank.
+  
+  //Check negative rank.
+  done = false;
+  for (int i = (rank-1); i > 0; i--) {
+    if (board[i][numfile].isOccupied == true && done == false) {
+      if (board[i][numfile].owner == oppColor) {
+        if (i == (rank-1) && oppPieces[board[i][numfile].piece].type == "King") {
+          valid = false;
+        }
+        if (oppPieces[board[i][numfile].piece].type == "Rook" ||
+            oppPieces[board[i][numfile].piece].type == "Queen") {
+          valid = false;
+        }
+        
+      }
+      
+      done = true;
+    }
+    
+  } //Negative Rank
+  
+  //Check positive file.
+  done = false;
+  for (int i = (numfile+1); i <= 8; i++) {
+    if (board[rank][i].isOccupied == true && done == false) {
+      if (board[rank][i].owner == oppColor) {
+        if (i == (numfile+1) && oppPieces[board[rank][i].piece].type == "King") {
+          valid = false;
+        }
+        if (oppPieces[board[rank][i].piece].type == "Rook" ||
+            oppPieces[board[rank][i].piece].type == "Queen") {
+          valid = false;
+        }
+        
+      }
+      
+      done = true;
+    }
+    
+  } //Positive File.
+  
+  
+  //Check negative file.
+  done = false;
+  for (int i = (numfile-1); i > 0; i--) {
+    if (board[rank][i].isOccupied == true && done == false) {
+      if (board[rank][i].owner == oppColor) {
+        if (i == (numfile-1) && oppPieces[board[rank][i].piece].type == "King") {
+          valid = false;
+        }
+        if (oppPieces[board[rank][i].piece].type == "Rook" ||
+            oppPieces[board[rank][i].piece].type == "Queen") {
+          valid = false;
+        }
+        
+      }
+      
+      done = true;
+    }
+    
+  } //Negative File.
+  
+  ////////////////////
+  //Check Diagonals.//
+  ////////////////////
+  
+  //Check 1st quadrant diagonal.
+  done = false;
+  if (rank > numfile) {
+    diagMoves = (8 - rank);
+  } else {
+    diagMoves = (8 - numfile);
+  }
+  for (int i = 1; i <= diagMoves; i++) {
+    if (board[rank + i][numfile + i].isOccupied && done == false) {
+      if (board[rank + i][numfile + i].owner == oppColor) {
+        //If a pawn is in striking distance.
+        if (i == 1 && (rankDir * -1) < 0 &&
+            oppPieces[board[rank + i][numfile + i].piece].type == "Pawn") {
+          valid = false;
+        }
+        //If a king can attack.
+        if (i == 1 && oppPieces[board[rank + i][numfile + i].piece].type == "King") {
+          valid = false;
+        }
+        //If a bishop or queen can attack.
+        if (oppPieces[board[rank + i][numfile + i].piece].type == "Bishop" ||
+            oppPieces[board[rank + i][numfile + i].piece].type == "Queen") {
+          valid = false;
+        }
+        
+      }
+      
+      done = true;
+    }
+    
+  } //1st Quadrant Diagonal
+  
+  
+  //Check 2nd quadrant diagonal.
+  done = false;
+  if ((8 - rank) < numfile) {
+    diagMoves = (8 - rank);
+  } else {
+    diagMoves = (numfile - 1);
+  }
+  for (int i = 1; i <= diagMoves; i++) {
+    if (board[rank + i][numfile - i].isOccupied && done == false) {
+      if (board[rank + i][numfile - i].owner == oppColor) {
+        //If a pawn is in striking distance.
+        if (i == 1 && (rankDir * -1) < 0 &&
+            oppPieces[board[rank + i][numfile - i].piece].type == "Pawn") {
+          valid = false;
+        }
+        //If a king can attack.
+        if (i == 1 && oppPieces[board[rank + i][numfile - i].piece].type == "King") {
+          valid = false;
+        }
+        //If a bishop or queen can attack.
+        if (oppPieces[board[rank + i][numfile - i].piece].type == "Bishop" ||
+            oppPieces[board[rank + i][numfile - i].piece].type == "Queen") {
+          valid = false;
+        }
+        
+      }
+      
+      done = true;
+    }
+    
+  }
+  
+  //Check 3rd quadrant diagonal.
+  done = false;
+  if (rank > numfile) {
+    diagMoves = (numfile - 1);
+  } else {
+    diagMoves = (rank - 1);
+  }
+  for (int i = 1; i <= diagMoves; i++) {
+    if (board[rank - i][numfile - i].isOccupied && done == false) {
+      if (board[rank - i][numfile - i].owner == oppColor) {
+        //If a pawn is in striking distance.
+        if (i == 1 && (rankDir * -1) > 0 &&
+            oppPieces[board[rank - i][numfile - i].piece].type == "Pawn") {
+          valid = false;
+        }
+        //If a king can attack.
+        if (i == 1 && oppPieces[board[rank - i][numfile - i].piece].type == "King") {
+          valid = false;
+        }
+        //If a bishop or queen can attack.
+        if (oppPieces[board[rank - i][numfile - i].piece].type == "Bishop" ||
+            oppPieces[board[rank - i][numfile - i].piece].type == "Queen") {
+          valid = false;
+        }
+        
+      }
+      
+      done = true;
+    }
+    
+  }
+  
+  //Check 4th quadrant diagonal.
+  done = false;
+  if (numfile <= (8 - rank)) {
+    diagMoves = (rank - 1);
+  } else {
+    diagMoves = (8 - numfile);
+  }
+  for (int i = 1; i <= diagMoves; i++) {
+    if (board[rank - i][numfile + i].isOccupied && done == false) {
+      if (board[rank - i][numfile + i].owner == oppColor) {
+        //If a pawn is in striking distance.
+        if (i == 1 && (rankDir * -1) > 0 &&
+            oppPieces[board[rank - i][numfile + i].piece].type == "Pawn") {
+          valid = false;
+        }
+        //If a king can attack.
+        if (i == 1 && oppPieces[board[rank - i][numfile + i].piece].type == "King") {
+          valid = false;
+        }
+        //If a bishop or queen can attack.
+        if (oppPieces[board[rank - i][numfile + i].piece].type == "Bishop" ||
+            oppPieces[board[rank - i][numfile + i].piece].type == "Queen") {
+          valid = false;
+        }
+        
+      }
+      
+      done = true;
+    }
+    
+  }
+  
+  /////////////////////
+  //Check for Knights//
+  /////////////////////
+  
+  //Check for possible knights placing the king in check.
+  
+  //+1 +2
+  if (rank + 1 <= 8 && numfile + 2 <= 8) {
+    if (board[rank + 1][numfile + 2].isOccupied) {
+      if (board[rank + 1][numfile + 2].owner == oppColor) {
+        if (oppPieces[board[rank + 1][numfile + 2].piece].type == "Knight") {
+          valid = false;
+        }
+        
+      }
+      
+    }
+    
+  }
+  
+  //+2 +1
+  if (rank + 2 <= 8 && numfile + 1 <= 8) {
+    if (board[rank + 2][numfile + 1].isOccupied) {
+      if (board[rank + 2][numfile + 1].owner == oppColor) {
+        if (oppPieces[board[rank + 2][numfile + 1].piece].type == "Knight") {
+          valid = false;
+        }
+        
+      }
+      
+    }
+    
+  }
+  
+  //+1 -2
+  if (rank + 1 <= 8 && numfile - 2 > 0) {
+    if (board[rank + 1][numfile - 2].isOccupied) {
+      if (board[rank + 1][numfile - 2].owner == oppColor) {
+        if (oppPieces[board[rank + 1][numfile - 2].piece].type == "Knight") {
+          valid = false;
+        }
+        
+      }
+      
+    }
+    
+  }
+  
+  //+2 -1
+  if (rank + 2 <= 8 && numfile - 1 > 0) {
+    if (board[rank + 2][numfile - 1].isOccupied) {
+      if (board[rank + 2][numfile - 1].owner == oppColor) {
+        if (oppPieces[board[rank + 2][numfile - 1].piece].type == "Knight") {
+          valid = false;
+        }
+        
+      }
+      
+    }
+    
+  }
+  
+  //-1 -2
+  if (rank - 1 > 0 && numfile - 2 > 0) {
+    if (board[rank - 1][numfile - 2].isOccupied) {
+      if (board[rank - 1][numfile - 2].owner == oppColor) {
+        if (oppPieces[board[rank - 1][numfile - 2].piece].type == "Knight") {
+          valid = false;
+        }
+        
+      }
+      
+    }
+    
+  }
+  
+  //-2 -1
+  if (rank - 2 > 0 && numfile - 1 > 0) {
+    if (board[rank - 2][numfile - 1].isOccupied) {
+      if (board[rank - 2][numfile - 1].owner == oppColor) {
+        if (oppPieces[board[rank - 2][numfile - 1].piece].type == "Knight") {
+          valid = false;
+        }
+        
+      }
+      
+    }
+    
+  }
+  
+  //-1 +2
+  if (rank - 1 > 0 && numfile + 2 <= 8) {
+    if (board[rank - 1][numfile + 2].isOccupied) {
+      if (board[rank - 1][numfile + 2].owner == oppColor) {
+        if (oppPieces[board[rank - 1][numfile + 2].piece].type == "Knight") {
+          valid = false;
+        }
+        
+      }
+      
+    }
+    
+  }
+  
+  //-2 +1
+  if (rank - 2 > 0 && numfile + 1 <= 8) {
+    if (board[rank - 2][numfile + 1].isOccupied) {
+      if (board[rank - 2][numfile + 1].owner == oppColor) {
+        if (oppPieces[board[rank - 2][numfile + 1].piece].type == "Knight") {
+          valid = false;
+        }
+        
+      }
+      
+    }
+    
+  }
+  
+  //Return value of valid
+  return valid;
+}
 
 } // chess
 
