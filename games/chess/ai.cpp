@@ -28,13 +28,11 @@ std::string AI::get_name() const
 void AI::start()
 {
     // This is a good place to initialize any variables
-    srand(time(NULL));
-  /*
-  //Ask user for depth limit.
-  std::cout<<"Please enter a depth limit for ID DLM."<<std::endl;
-  std::cin>>depthLimit;
-   */
-  depthLimit = 4;
+  //Maximum depth limit allowed.
+  depthLimit = 6;
+  
+  //15 min. in seconds divided by the expected number of moves in a game.
+  moveTime = ((15*60)/80);
 }
 
 /// <summary>
@@ -63,11 +61,13 @@ bool AI::run_turn()
 {
   // Here is where you'll want to code your AI.
   
+  //Begining Timer.
+  startTime = clock();
+  
   //Variable Declaration:
   std::vector< std::vector<tile> >  gameBoard;
   std::vector<ai_move> allMoves;
   ai_move toMove;
-  int randNum;
   
   //Variable Declaration:
   std::vector<ai_piece> myPieces;
@@ -99,7 +99,12 @@ bool AI::run_turn()
   gameBoard = getBoard();
   
   //Call the MiniMax function.
-  toMove = miniMax(myPieces, oppPieces, depthLimit, gameBoard);
+  //toMove = miniMax(myPieces, oppPieces, depthLimit, gameBoard);
+  for (int i = 0; i < depthLimit; i++) {
+    //std::cout<<i;
+    toMove = miniMax(myPieces, oppPieces, i, gameBoard);
+  }
+  //std::cout<<std::endl;
   
   //Output the move made to the terminal.
   std::cout<<player -> pieces[toMove.piece_moved] -> type<<" "<<player -> pieces[toMove.piece_moved] -> file<<player -> pieces[toMove.piece_moved] -> rank<<" : "
@@ -121,27 +126,6 @@ bool AI::run_turn()
   //Make the move selected by MiniMax
   player -> pieces[toMove.piece_moved] -> move(toMove.destination_file, toMove.destination_rank, "Queen");
   
-  /*
-  //Get all the possible moves for this turn.
-  allMoves = action(myPieces, oppPieces, gameBoard, player -> color, player -> opponent -> color, player -> rank_direction);
-  
-  //Get a random number for picking the move.
-  randNum = (rand() % allMoves.size());
-  
-  //Print out starting position of piece to move.
-  std::cout<<player -> pieces[allMoves[randNum].piece_moved] -> type<<" "<<player -> pieces[allMoves[randNum].piece_moved] -> file<<player -> pieces[allMoves[randNum].piece_moved] -> rank<<": ";
-  
-  //Make the move selected by the random number.
-  player -> pieces[allMoves[randNum].piece_moved] -> move(allMoves[randNum].destination_file, allMoves[randNum].destination_rank, "Queen");
-  
-  //Print out all possible moves for the piece that was moved.
-  for (int i = 0; i < allMoves.size(); i++) {
-    if (player -> pieces[allMoves[i].piece_moved] -> id == player -> pieces[allMoves[randNum].piece_moved] -> id) {
-      std::cout<<allMoves[i].destination_file<<allMoves[i].destination_rank<<" ";
-    }
-  }
-  std::cout<<std::endl;
-  */
   return true; // to signify we are done with our turn.
 }
 
@@ -1794,6 +1778,8 @@ ai_move AI::miniMax(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
   std::vector< std::vector<tile> > tempBoard;
   rep_move tempMove;
   bool repeat;
+  int alpha;
+  int beta;
   
   //Initialize variables.
   myCaptured.clear();
@@ -1887,16 +1873,28 @@ ai_move AI::miniMax(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
     //END: Create a temp board with the move applied.//
     ///////////////////////////////////////////////////
     
-    //MinVal function call.
-    minValue = minVal(myPieces, oppPieces, (limit-1), tempBoard, myCaptured, oppCaptured);
+    //Initialize Alpha/Beta values.
+    alpha = -1000;
+    beta = 1000;
     
-    //Penalize the move 20 points if it is a repeat one of the last 3 moves.
-    if (repeat) {
-      minValue = minValue - 20;
+    //MinVal function call.
+    minValue = minVal(myPieces, oppPieces, (limit-1), tempBoard, myCaptured, oppCaptured, alpha, beta);
+    
+    //Prune if necessary
+    if (minValue > beta) {
+      break;
     }
-    if (minValue > maxValue) {
+    
+    //Penalize the move 50 points if it is a repeat one of the last 3 moves.
+    if (repeat) {
+      minValue = minValue - 50;
+    }
+    
+    //Set best action and alpha values.
+    if (minValue > maxValue && minValue > alpha) {
       maxMove = i;
       maxValue = minValue;
+      alpha = minValue;
     }
     
   }
@@ -1910,7 +1908,7 @@ ai_move AI::miniMax(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
 } //MiniMax Function.
 
 //Min value function for minimax.
-int AI::minVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, int limit, std::vector< std::vector<tile> >  board, std::vector<int> myCaptured, std::vector<int> oppCaptured) {
+int AI::minVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, int limit, std::vector< std::vector<tile> >  board, std::vector<int> myCaptured, std::vector<int> oppCaptured, int alpha, int beta) {
   //Variable Declaration:
   int value;
   int maxValue;
@@ -1919,12 +1917,21 @@ int AI::minVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, 
   std::vector<ai_move> allMoves;
   ai_piece tempPiece;
   std::vector< std::vector<tile> > tempBoard;
+  bool timeUp;
   
   //Initialize Variables:
   minValue = 100;
   
+  //See if time alotted for move is up.
+  timeUp = false;
+  if (((clock() - startTime)/CLOCKS_PER_SEC) > moveTime) {
+    timeUp = true;
+    
+    //std::cout<<"Used: "<<((clock() - startTime)/CLOCKS_PER_SEC)<<" Alotted: "<<moveTime<<std::endl;
+  }
+  
   //If depth limit reached, return the value for the pieces on the board.
-  if (limit <= 0) {
+  if (limit <= 0 || timeUp) {
     value = getValue(myPieces, oppPieces, board);
     
     return value;
@@ -2001,10 +2008,18 @@ int AI::minVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, 
     ///////////////////////////////////////////////////
     
     //MaxVal function call.
-    maxValue = maxVal(myPieces, oppPieces, (limit-1), tempBoard, myCaptured, oppCaptured);
-    if (maxValue < minValue) {
+    maxValue = maxVal(myPieces, oppPieces, (limit-1), tempBoard, myCaptured, oppCaptured, alpha, beta);
+  
+    //Prune if necessary
+    if (maxValue < alpha) {
+      break;
+    }
+    
+    //Set best action and beta values.
+    if (maxValue < minValue && maxValue < beta) {
       
       minValue = maxValue;
+      beta = maxValue;
     }
     
   }
@@ -2014,7 +2029,7 @@ int AI::minVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, 
 } //MinVal Function.
 
 //Max value function for minimax.
-int AI::maxVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, int limit, std::vector< std::vector<tile> >  board, std::vector<int> myCaptured, std::vector<int> oppCaptured) {
+int AI::maxVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, int limit, std::vector< std::vector<tile> >  board, std::vector<int> myCaptured, std::vector<int> oppCaptured, int alpha, int beta) {
   //Variable Declaration:
   int value;
   int maxValue;
@@ -2023,12 +2038,21 @@ int AI::maxVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, 
   std::vector<ai_move> allMoves;
   ai_piece tempPiece;
   std::vector< std::vector<tile> > tempBoard;
+  bool timeUp;
   
   //Initialize Variables:
   maxValue = -100;
   
+  //See if time alotted for move is up.
+  timeUp = false;
+  if (((clock() - startTime)/CLOCKS_PER_SEC) > moveTime) {
+    timeUp = true;
+  
+    //std::cout<<"Used: "<<((clock() - startTime)/CLOCKS_PER_SEC)<<" Alotted: "<<moveTime<<std::endl;
+  }
+  
   //If depth limit reached, return the value for the pieces on the board.
-  if (limit <= 0) {
+  if (limit <= 0 || timeUp) {
     value = getValue(myPieces, oppPieces, board);
     
     return value;
@@ -2105,10 +2129,18 @@ int AI::maxVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, 
     ///////////////////////////////////////////////////
     
     //MinVal function call.
-    minValue = minVal(myPieces, oppPieces, (limit-1), tempBoard, myCaptured, oppCaptured);
-    if (minValue > maxValue) {
+    minValue = minVal(myPieces, oppPieces, (limit-1), tempBoard, myCaptured, oppCaptured, alpha, beta);
+  
+    //Prune if necessary
+    if (minValue > beta) {
+      break;
+    }
+    
+    //Set best action and alplha values.
+    if (minValue > maxValue && minValue > alpha) {
       
       maxValue = minValue;
+      alpha = minValue;
     }
     
   }

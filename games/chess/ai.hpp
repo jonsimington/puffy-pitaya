@@ -14,6 +14,7 @@
 #include "ai_move.hpp"
 #include "ai_piece.hpp"
 #include "ai_tile.hpp"
+#include <ctime>
 
 // You can add additional #includes here
 
@@ -46,7 +47,9 @@ public:
   //Variable Declaration:
   int depthLimit;
   std::vector<rep_move> previous_moves;
-
+  int startTime;
+  int moveTime;
+  
     /// <summary>
     /// This returns your AI's name to the game server.
     /// Replace the string name.
@@ -126,10 +129,10 @@ public:
   ai_move miniMax(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, int limit, std::vector< std::vector<tile> >  board);
   
   //Min value function for minimax.
-  int minVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, int limit, std::vector< std::vector<tile> > board, std::vector<int> myCaptured, std::vector<int> oppCaptured);
+  int minVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, int limit, std::vector< std::vector<tile> > board, std::vector<int> myCaptured, std::vector<int> oppCaptured, int alpha, int beta);
   
   //Max value function for minimax.
-  int maxVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, int limit, std::vector< std::vector<tile> > board, std::vector<int> myCaptured, std::vector<int> oppCaptured);
+  int maxVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, int limit, std::vector< std::vector<tile> > board, std::vector<int> myCaptured, std::vector<int> oppCaptured, int alpha, int beta);
   
   //Returns the value of the pieces based on the given board state.
   int getValue(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, std::vector< std::vector<tile> > board);
