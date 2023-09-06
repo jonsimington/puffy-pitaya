@@ -19,7 +19,7 @@ namespace chess
 std::string AI::get_name() const
 {
     // REPLACE WITH YOUR TEAM NAME!
-    return "Ian Chess";
+    return "Puffy Pitaya";
 }
 
 /// <summary>
@@ -30,7 +30,7 @@ void AI::start()
     // This is a good place to initialize any variables
   //Maximum depth limit allowed.
   depthLimit = 6;
-  
+
   //15 min. in seconds divided by the expected number of moves in a game.
   moveTime = ((15*60)/80);
 }
@@ -60,21 +60,21 @@ void AI::ended(bool won, const std::string& reason)
 bool AI::run_turn()
 {
   // Here is where you'll want to code your AI.
-  
+
   //Begining Timer.
   startTime = clock();
-  
+
   //Variable Declaration:
   std::vector< std::vector<tile> >  gameBoard;
   std::vector<ai_move> allMoves;
   ai_move toMove;
-  
+
   //Variable Declaration:
   std::vector<ai_piece> myPieces;
   std::vector<ai_piece> oppPieces;
   ai_piece tempPiece;
   rep_move tempMove;
-  
+
   //Populate myPieces and oppPieces.
   myPieces.clear();
   oppPieces.clear();
@@ -94,10 +94,10 @@ bool AI::run_turn()
     tempPiece.captured = player -> opponent -> pieces[j] -> captured;
     oppPieces.push_back(tempPiece);
   }
-  
+
   //Get a copy of the gameboard for the current turn.
   gameBoard = getBoard();
-  
+
   //Call the MiniMax function.
   //toMove = miniMax(myPieces, oppPieces, depthLimit, gameBoard);
   for (int i = 0; i < depthLimit; i++) {
@@ -105,11 +105,11 @@ bool AI::run_turn()
     toMove = miniMax(myPieces, oppPieces, i, gameBoard);
   }
   //std::cout<<std::endl;
-  
+
   //Output the move made to the terminal.
   std::cout<<player -> pieces[toMove.piece_moved] -> type<<" "<<player -> pieces[toMove.piece_moved] -> file<<player -> pieces[toMove.piece_moved] -> rank<<" : "
            <<toMove.destination_file<<toMove.destination_rank<<std::endl;
-  
+
   //Place the move to be made in the vector of previous moves.
   tempMove.piece_moved = toMove.piece_moved;
   tempMove.origin_file = player -> pieces[toMove.piece_moved] -> file;
@@ -117,15 +117,15 @@ bool AI::run_turn()
   tempMove.destination_file = toMove.destination_file;
   tempMove.destination_rank = toMove.destination_rank;
   previous_moves.push_back(tempMove);
-  
+
   //If size is greater that 3, erase the front (oldest) move.
   if (previous_moves.size() > 3) {
     previous_moves.erase(previous_moves.begin());
   }
-  
+
   //Make the move selected by MiniMax
   player -> pieces[toMove.piece_moved] -> move(toMove.destination_file, toMove.destination_rank, "Queen");
-  
+
   return true; // to signify we are done with our turn.
 }
 
@@ -204,21 +204,21 @@ std::vector< std::vector<tile> >  AI::getBoard() {
   std::vector<tile> tempRank;
   tile tempTile;
   int numFile;
-  
+
   tempTile.isOccupied = false;
-  
+
   //Create an empty Rank to push back to the board.
   for (int i=0; i <= 8; i++)
   {
     tempRank.push_back(tempTile);
   }
-  
+
   //Push empty ranks to create the board.
   for (int i=0; i <= 8; i++)
   {
     tempBoard.push_back(tempRank);
   }
-  
+
   //Place my pieces on the board.
   for (int i=0; i < player -> pieces.size(); i++)
   {
@@ -248,14 +248,14 @@ std::vector< std::vector<tile> >  AI::getBoard() {
     {
       numFile = 8;
     }
-    
+
     //Set board values where the piece is.
     tempBoard[player -> pieces[i] -> rank][numFile].isOccupied = true;
     tempBoard[player -> pieces[i] -> rank][numFile].owner = player -> color;
     tempBoard[player -> pieces[i] -> rank][numFile].piece = i;
-    
+
   } //My pieces.
-  
+
   //Place opponents pieces on the board.
   for (int i=0; i < player -> opponent -> pieces.size(); i++)
   {
@@ -285,14 +285,14 @@ std::vector< std::vector<tile> >  AI::getBoard() {
     {
       numFile = 8;
     }
-    
+
     //Set board values where the piece is.
     tempBoard[player -> opponent -> pieces[i] -> rank][numFile].isOccupied = true;
     tempBoard[player -> opponent -> pieces[i] -> rank][numFile].owner = player -> opponent -> color;
     tempBoard[player -> opponent -> pieces[i] -> rank][numFile].piece = i;
-    
+
   } //Opponents pieces.
-  
+
   return tempBoard;
 } //Get Board Function.
 
@@ -303,22 +303,22 @@ std::vector<ai_move> AI::action(std::vector<ai_piece> myPieces, std::vector<ai_p
   std::vector<ai_move> allMoves;
   std::vector<ai_move> tempMoves;
   ai_move temp;
-  
+
   allMoves.clear();
-  
+
   //For every piece owned by this AI, get every possible move by that piece and concatenate it with the moves from all
   //the other pieces to create a vector with all possible moves.
   for (int i = 0; i < myPieces.size(); i++) {
     if (myPieces[i].captured == false) {
       tempMoves.clear();
-      
+
       tempMoves = get_Move(myPieces, oppPieces, myPieces[i], i, board, myColor, oppColor, rankDir);
-      
+
       allMoves.insert(allMoves.end(), tempMoves.begin(), tempMoves.end());
     }
-    
+
   }
-  
+
   return allMoves;
 } //Action Function.
 
@@ -331,9 +331,9 @@ std::vector<ai_move> AI::get_Move(std::vector<ai_piece> myPieces, std::vector<ai
   ai_move temp;
   int numFile;
   int rank;
-  
+
   moves_Got.clear();
-  
+
   //Get numerical value for the file of the piece.
   if (toMove.file == "a") {
     numFile = 1;
@@ -352,88 +352,88 @@ std::vector<ai_move> AI::get_Move(std::vector<ai_piece> myPieces, std::vector<ai
   } else if (toMove.file == "h") {
     numFile = 8;
   }
-  
+
   //Get rank of piece to move.
   rank = toMove.rank;
-  
+
   ////////////////////////////////////
   //If Pawn, make appropriate moves.//
   ////////////////////////////////////
-  
+
   if (toMove.type == "Pawn") {
     tempMoves.clear();
-    
+
     tempMoves = pawn_movement(myPieces, oppPieces, toMove, numPiece, numFile, rank, board, myColor, oppColor, rankDir);
     moves_Got.insert(moves_Got.end(), tempMoves.begin(), tempMoves.end());
-    
+
   } //Pawn movement.
-  
+
   ///////////////////////////////////
   //If Rook, make appropiate moves.//
   ///////////////////////////////////
-  
+
   if (toMove.type == "Rook") {
     tempMoves.clear();
-    
+
     tempMoves = rook_movement(myPieces, oppPieces, toMove, numPiece, numFile, rank, board, myColor, oppColor, rankDir);
     moves_Got.insert(moves_Got.end(), tempMoves.begin(), tempMoves.end());
-    
+
   } //Rook Movement.
-  
+
   /////////////////////////////////////
   //If Bishop, make appropiate moves.//
   /////////////////////////////////////
-  
+
   if (toMove.type == "Bishop") {
     tempMoves.clear();
-    
+
     tempMoves = bishop_movement(myPieces, oppPieces, toMove, numPiece, numFile, rank, board, myColor, oppColor, rankDir);
     moves_Got.insert(moves_Got.end(), tempMoves.begin(), tempMoves.end());
-    
+
   } //Bishop Movement.
-  
+
   /////////////////////////////////////
   //If Knight, make appropiate moves.//
   /////////////////////////////////////
-  
+
   if (toMove.type == "Knight") {
     tempMoves.clear();
-    
+
     tempMoves = knight_movement(myPieces, oppPieces, toMove, numPiece, numFile, rank, board, myColor, oppColor, rankDir);
     moves_Got.insert(moves_Got.end(), tempMoves.begin(), tempMoves.end());
-    
+
   } //Knight Movement.
-  
+
   ////////////////////////////////////
   //If Queen, make appropiate moves.//
   ////////////////////////////////////
-  
+
   if (toMove.type == "Queen") {
     tempMoves.clear();
-    
+
     tempMoves = rook_movement(myPieces, oppPieces, toMove, numPiece, numFile, rank, board, myColor, oppColor, rankDir);
     moves_Got.insert(moves_Got.end(), tempMoves.begin(), tempMoves.end());
-    
+
     tempMoves.clear();
-    
+
     tempMoves = bishop_movement(myPieces, oppPieces, toMove, numPiece, numFile, rank, board, myColor, oppColor, rankDir);
     moves_Got.insert(moves_Got.end(), tempMoves.begin(), tempMoves.end());
-    
+
   } //Queen Movement.
-  
+
   ///////////////////////////////////
   //If King, make appropiate moves.//
   ///////////////////////////////////
-  
+
   if (toMove.type == "King") {
     tempMoves.clear();
-    
+
     tempMoves = king_movement(myPieces, oppPieces, toMove, numPiece, numFile, rank, board, myColor, oppColor, rankDir);
-    
+
     moves_Got.insert(moves_Got.end(), tempMoves.begin(), tempMoves.end());
-    
+
   } //King Movement.
-  
+
   return moves_Got;
 } //Get Move Function.
 
@@ -448,9 +448,9 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
   int diagMoves;
   bool valid;
   bool done;
-  
+
   valid = true;
-  
+
   /////////////////////////////////////
   //Apply potential move to the board//
   /////////////////////////////////////
@@ -473,7 +473,7 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
   } else if (myPieces[nextMove.piece_moved].file == "h") {
     numfile = 8;
   }
-  
+
   //Get file number for where the piece would end up.
   if (nextMove.destination_file == "a") {
     destfile = 1;
@@ -492,18 +492,18 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
   } else if (nextMove.destination_file == "h") {
     destfile = 8;
   }
-  
+
   //Place piece in new location on board.
   board[nextMove.destination_rank][destfile].isOccupied = true;
   board[nextMove.destination_rank][destfile].owner = board[myPieces[nextMove.piece_moved].rank][numfile].owner;
   board[nextMove.destination_rank][destfile].piece = nextMove.piece_moved;
-  
+
   //Erase piece from previous location on the board.
   board[myPieces[nextMove.piece_moved].rank][numfile].isOccupied = false;
   board[myPieces[nextMove.piece_moved].rank][numfile].owner = "";
   board[myPieces[nextMove.piece_moved].rank][numfile].piece = 0;
   */
-  
+
   //Get file number for where the piece originates.
   if (myPieces[nextMove.piece_moved].file == "a") {
     numfile = 1;
@@ -522,12 +522,12 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
   } else if (myPieces[nextMove.piece_moved].file == "h") {
     numfile = 8;
   }
-  
+
   //Erase piece from previous location on the board.
   board[myPieces[nextMove.piece_moved].rank][numfile].isOccupied = false;
   board[myPieces[nextMove.piece_moved].rank][numfile].owner = "";
   board[myPieces[nextMove.piece_moved].rank][numfile].piece = 0;
-  
+
   //Get file number for where the piece would end up.
   if (nextMove.destination_file == "a") {
     numfile = 1;
@@ -546,16 +546,16 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
   } else if (nextMove.destination_file == "h") {
     numfile = 8;
   }
-  
+
   //Place piece in new location on board.
   board[nextMove.destination_rank][numfile].isOccupied = true;
   board[nextMove.destination_rank][numfile].owner = myColor;
   board[nextMove.destination_rank][numfile].piece = nextMove.piece_moved;
-  
+
   ///////////////////////////
   //Get King rank and file.//
   ///////////////////////////
-  
+
   //If King is piece moved.
   if (myPieces[nextMove.piece_moved].type == "King") {
     rank = nextMove.destination_rank;
@@ -576,7 +576,7 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
     } else if (nextMove.destination_file == "h") {
       numfile = 8;
     }
-    
+
   } else {
     //Find King piece.
     for (int l = 0; l < myPieces.size(); l++) {
@@ -584,10 +584,10 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
         king = l;
       }
     }
-  
+
     //Get rank and file.
     rank = myPieces[king].rank;
-  
+
     if (myPieces[king].file == "a") {
       numfile = 1;
     } else if (myPieces[king].file == "b") {
@@ -605,17 +605,17 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
     } else if (myPieces[king].file == "h") {
       numfile = 8;
     }
-  
+
   } //Get King rank and file.
-  
+
   /////////////////////////////////////////////////////////////////////////////////
   //Check 4 directions and 4 diagonals to see if a piece places my king in check.//
   /////////////////////////////////////////////////////////////////////////////////
-  
+
   ///////////////////////
   //Check 4 directions.//
   ///////////////////////
-  
+
   //Check positive rank.
   done = false;
   for (int i = (rank+1); i <= 8; i++) {
@@ -628,14 +628,14 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
             oppPieces[board[i][numfile].piece].type == "Queen") {
           valid = false;
         }
-        
+
       }
-      
+
       done = true;
     }
-    
+
   } //Positive rank.
-  
+
   //Check negative rank.
   done = false;
   for (int i = (rank-1); i > 0; i--) {
@@ -648,14 +648,14 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
             oppPieces[board[i][numfile].piece].type == "Queen") {
           valid = false;
         }
-        
+
       }
-      
+
       done = true;
     }
-    
+
   } //Negative Rank
-  
+
   //Check positive file.
   done = false;
   for (int i = (numfile+1); i <= 8; i++) {
@@ -668,15 +668,15 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
             oppPieces[board[rank][i].piece].type == "Queen") {
           valid = false;
         }
-        
+
       }
-      
+
       done = true;
     }
-    
+
   } //Positive File.
-  
-  
+
+
   //Check negative file.
   done = false;
   for (int i = (numfile-1); i > 0; i--) {
@@ -689,18 +689,18 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
             oppPieces[board[rank][i].piece].type == "Queen") {
           valid = false;
         }
-        
+
       }
-      
+
       done = true;
     }
-    
+
   } //Negative File.
-  
+
   ////////////////////
   //Check Diagonals.//
   ////////////////////
-  
+
   //Check 1st quadrant diagonal.
   done = false;
   if (rank > numfile) {
@@ -725,15 +725,15 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
           oppPieces[board[rank + i][numfile + i].piece].type == "Queen") {
         valid = false;
       }
-    
+
     }
-  
+
     done = true;
   }
-    
+
   } //1st Quadrant Diagonal
-  
-  
+
+
   //Check 2nd quadrant diagonal.
   done = false;
   if ((8 - rank) < numfile) {
@@ -758,14 +758,14 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
             oppPieces[board[rank + i][numfile - i].piece].type == "Queen") {
           valid = false;
         }
-        
+
       }
-    
+
       done = true;
     }
-    
+
   }
-  
+
   //Check 3rd quadrant diagonal.
   done = false;
   if (rank > numfile) {
@@ -790,14 +790,14 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
             oppPieces[board[rank - i][numfile - i].piece].type == "Queen") {
           valid = false;
         }
-        
+
       }
-      
+
       done = true;
     }
-    
+
   }
-  
+
   //Check 4th quadrant diagonal.
   done = false;
   if (numfile <= (8 - rank)) {
@@ -822,20 +822,20 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
          oppPieces[board[rank - i][numfile + i].piece].type == "Queen") {
           valid = false;
         }
-  
+
       }
-      
+
       done = true;
     }
-    
+
   }
-  
+
   //Check for possible knights placing the king in check.
-  
+
   /////////////////////
   //Check for Knights//
   /////////////////////
-  
+
   //+1 +2
   if (rank + 1 <= 8 && numfile + 2 <= 8) {
     if (board[rank + 1][numfile + 2].isOccupied) {
@@ -843,13 +843,13 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
         if (oppPieces[board[rank + 1][numfile + 2].piece].type == "Knight") {
           valid = false;
         }
-      
+
       }
-    
+
     }
-    
+
   }
-  
+
   //+2 +1
   if (rank + 2 <= 8 && numfile + 1 <= 8) {
     if (board[rank + 2][numfile + 1].isOccupied) {
@@ -857,13 +857,13 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
         if (oppPieces[board[rank + 2][numfile + 1].piece].type == "Knight") {
           valid = false;
         }
-      
+
       }
-    
+
     }
-  
+
   }
-  
+
   //+1 -2
   if (rank + 1 <= 8 && numfile - 2 > 0) {
     if (board[rank + 1][numfile - 2].isOccupied) {
@@ -871,13 +871,13 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
         if (oppPieces[board[rank + 1][numfile - 2].piece].type == "Knight") {
           valid = false;
         }
-      
+
       }
-    
+
     }
-  
+
   }
-  
+
   //+2 -1
   if (rank + 2 <= 8 && numfile - 1 > 0) {
     if (board[rank + 2][numfile - 1].isOccupied) {
@@ -885,13 +885,13 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
         if (oppPieces[board[rank + 2][numfile - 1].piece].type == "Knight") {
           valid = false;
         }
-      
+
       }
-    
+
     }
-  
+
   }
-  
+
   //-1 -2
   if (rank - 1 > 0 && numfile - 2 > 0) {
     if (board[rank - 1][numfile - 2].isOccupied) {
@@ -899,13 +899,13 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
         if (oppPieces[board[rank - 1][numfile - 2].piece].type == "Knight") {
           valid = false;
         }
-      
+
       }
-    
+
     }
-  
+
   }
-  
+
   //-2 -1
   if (rank - 2 > 0 && numfile - 1 > 0) {
     if (board[rank - 2][numfile - 1].isOccupied) {
@@ -913,13 +913,13 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
         if (oppPieces[board[rank - 2][numfile - 1].piece].type == "Knight") {
           valid = false;
         }
-      
+
       }
-    
+
     }
-  
+
   }
-  
+
   //-1 +2
   if (rank - 1 > 0 && numfile + 2 <= 8) {
     if (board[rank - 1][numfile + 2].isOccupied) {
@@ -927,13 +927,13 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
         if (oppPieces[board[rank - 1][numfile + 2].piece].type == "Knight") {
           valid = false;
         }
-        
+
       }
-      
+
     }
-    
+
   }
-  
+
   //-2 +1
   if (rank - 2 > 0 && numfile + 1 <= 8) {
     if (board[rank - 2][numfile + 1].isOccupied) {
@@ -941,13 +941,13 @@ bool AI::valid_move(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
         if (oppPieces[board[rank - 2][numfile + 1].piece].type == "Knight") {
           valid = false;
         }
-      
+
       }
-    
+
     }
-  
+
   }
-  
+
   //Return value of valid
   return valid;
 } //Valid Move Function.
@@ -958,36 +958,36 @@ std::vector<ai_move> AI::pawn_movement(std::vector<ai_piece> myPieces, std::vect
   //Variable Declaration:
   ai_move temp;
   std::vector<ai_move> moves_Got;
-  
+
   //If forward move is legal.
   if (board[toMove.rank + rankDir][numFile].isOccupied == false) {
     temp.destination_file = toMove.file;
     temp.destination_rank = (toMove.rank + rankDir);
     temp.piece_moved = numPiece;
-    
+
     if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir))
     {
       moves_Got.push_back(temp);
     }
-    
+
   } //Forward move.
-  
+
   //If double forward move is legal.
   if ( ( (rankDir > 0) && (rank == 2) ) || ( (rankDir < 0) && (rank == 7) ) ) {
     if ((board[toMove.rank + (rankDir * 2)][numFile].isOccupied == false) && (board[toMove.rank + rankDir][numFile].isOccupied == false)) {
       temp.destination_file = toMove.file;
       temp.destination_rank = (toMove.rank + (rankDir * 2));
       temp.piece_moved = numPiece;
-  
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir))
       {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   } //Double Forward Move.
-  
+
   //If capturing right diagonal is legal.
   if (numFile + 1 <= 8) {
     if (board[toMove.rank + rankDir][numFile + 1].isOccupied == true) {
@@ -995,17 +995,17 @@ std::vector<ai_move> AI::pawn_movement(std::vector<ai_piece> myPieces, std::vect
         temp.destination_file = ('a' + numFile);
         temp.destination_rank = (toMove.rank + rankDir);
         temp.piece_moved = numPiece;
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir))
         {
           moves_Got.push_back(temp);
         }
       }
-      
+
     }
-    
+
   } //Right diagonal.
-  
+
   //If capturing left diagonal is legal.
   if (numFile - 1 > 0) {
     if (board[toMove.rank + rankDir][numFile - 1].isOccupied == true) {
@@ -1013,17 +1013,17 @@ std::vector<ai_move> AI::pawn_movement(std::vector<ai_piece> myPieces, std::vect
         temp.destination_file = ('a' + numFile - 2);
         temp.destination_rank = (toMove.rank + rankDir);
         temp.piece_moved = numPiece;
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir))
         {
           moves_Got.push_back(temp);
         }
       }
-      
+
     }
-    
+
   } //Left diagonal.
-  
+
   return moves_Got;
 } //Pawn Movement Function.
 
@@ -1035,7 +1035,7 @@ std::vector<ai_move> AI::bishop_movement(std::vector<ai_piece> myPieces, std::ve
   std::vector<ai_move> moves_Got;
   bool done;
   int diagMoves;
-  
+
   //Check 1st quadrant diagonal.
   done = false;
   if (rank > numFile) {
@@ -1049,27 +1049,27 @@ std::vector<ai_move> AI::bishop_movement(std::vector<ai_piece> myPieces, std::ve
         temp.piece_moved = numPiece;
         temp.destination_rank = rank + i;
         temp.destination_file = ('a' + numFile - 1 + i);
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
+
       }
-      
+
       done = true;
     } else if (done == false) {
       temp.piece_moved = numPiece;
       temp.destination_rank = rank + i;
       temp.destination_file = ('a' + numFile - 1 + i);
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   } //1st Quadrant Diagonal
-  
+
   //Check 2nd quadrant diagonal.
   done = false;
   if ((8 - rank) < numFile) {
@@ -1083,27 +1083,27 @@ std::vector<ai_move> AI::bishop_movement(std::vector<ai_piece> myPieces, std::ve
         temp.piece_moved = numPiece;
         temp.destination_rank = rank + i;
         temp.destination_file = ('a' + numFile - 1 - i);
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
+
       }
-      
+
       done = true;
     } else if (done == false) {
       temp.piece_moved = numPiece;
       temp.destination_rank = rank + i;
       temp.destination_file = ('a' + numFile - 1 - i);
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   } //2nd Quadrant Diagonal
-  
+
   //Check 3rd quadrant diagonal.
   done = false;
   if (rank > numFile) {
@@ -1117,27 +1117,27 @@ std::vector<ai_move> AI::bishop_movement(std::vector<ai_piece> myPieces, std::ve
         temp.piece_moved = numPiece;
         temp.destination_rank = rank - i;
         temp.destination_file = ('a' + numFile - 1 - i);
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
+
       }
-      
+
       done = true;
     } else if (done == false) {
       temp.piece_moved = numPiece;
       temp.destination_rank = rank - i;
       temp.destination_file = ('a' + numFile - 1 - i);
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   } //3rd Quadrant Diagonal.
-  
+
   //Check 4th quadrant diagonal.
   done = false;
   if (numFile <= (8 - rank)) {
@@ -1151,27 +1151,27 @@ std::vector<ai_move> AI::bishop_movement(std::vector<ai_piece> myPieces, std::ve
         temp.piece_moved = numPiece;
         temp.destination_rank = rank - i;
         temp.destination_file = ('a' + numFile - 1 + i);
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
+
       }
-      
+
       done = true;
     } else if (done == false) {
       temp.piece_moved = numPiece;
       temp.destination_rank = rank - i;
       temp.destination_file = ('a' + numFile - 1 + i);
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   } //4th Quadrant Diagonal.
-  
+
   return moves_Got;
 } //Bishop Movement Function.
 
@@ -1183,7 +1183,7 @@ std::vector<ai_move> AI::rook_movement(std::vector<ai_piece> myPieces, std::vect
   std::vector<ai_move> moves_Got;
   bool done;
   done = false;
-  
+
   //Positive rank movement.
   for (int i = rank + 1; i <= 8; i++) {
     if (board[i][numFile].isOccupied == true && done == false) {
@@ -1191,29 +1191,29 @@ std::vector<ai_move> AI::rook_movement(std::vector<ai_piece> myPieces, std::vect
         temp.piece_moved = numPiece;
         temp.destination_rank = i;
         temp.destination_file = toMove.file;
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
+
       }
-      
+
       done = true;
     } else if (done == false) {
       temp.piece_moved = numPiece;
       temp.destination_rank = i;
       temp.destination_file = toMove.file;
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   } //Positive Rank Movement.
-  
+
   done = false;
-  
+
   //Negative rank movement.
   for (int i = rank - 1; i > 0; i--) {
     if (board[i][numFile].isOccupied == true && done == false) {
@@ -1221,29 +1221,29 @@ std::vector<ai_move> AI::rook_movement(std::vector<ai_piece> myPieces, std::vect
         temp.piece_moved = numPiece;
         temp.destination_rank = i;
         temp.destination_file = toMove.file;
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
+
       }
-      
+
       done = true;
     } else if (done == false) {
       temp.piece_moved = numPiece;
       temp.destination_rank = i;
       temp.destination_file = toMove.file;
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   } // Negative Rank Movement.
-  
+
   done = false;
-  
+
   //Positive file movement.
   for (int i = numFile + 1; i <= 8; i++) {
     if (board[rank][i].isOccupied == true && done == false) {
@@ -1251,29 +1251,29 @@ std::vector<ai_move> AI::rook_movement(std::vector<ai_piece> myPieces, std::vect
         temp.piece_moved = numPiece;
         temp.destination_rank = toMove.rank;
         temp.destination_file = ('a' + i - 1);
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
+
       }
-      
+
       done = true;
     } else if (done == false) {
       temp.piece_moved = numPiece;
       temp.destination_rank = toMove.rank;
       temp.destination_file = ('a' + i - 1);
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   } //Positive File Movement.
-  
+
   done = false;
-  
+
   //Negative file movement.
   for (int i = numFile - 1; i > 0; i--) {
     if (board[rank][i].isOccupied == true && done == false) {
@@ -1281,27 +1281,27 @@ std::vector<ai_move> AI::rook_movement(std::vector<ai_piece> myPieces, std::vect
         temp.piece_moved = numPiece;
         temp.destination_rank = toMove.rank;
         temp.destination_file = ('a' + i - 1);
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
+
       }
-      
+
       done = true;
     } else if (done == false) {
       temp.piece_moved = numPiece;
       temp.destination_rank = toMove.rank;
       temp.destination_file = ('a' + i - 1);
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   } //Negative File Movement.
-  
+
   return moves_Got;
 } //Rook Movement Function.
 
@@ -1311,7 +1311,7 @@ std::vector<ai_move> AI::knight_movement(std::vector<ai_piece> myPieces, std::ve
   //Variable Declaration:
   ai_move temp;
   std::vector<ai_move> moves_Got;
-  
+
   //+1 +2
   if (rank + 1 <= 8 && numFile + 2 <= 8) {
     if (board[rank + 1][numFile + 2].isOccupied) {
@@ -1319,26 +1319,26 @@ std::vector<ai_move> AI::knight_movement(std::vector<ai_piece> myPieces, std::ve
         temp.piece_moved = numPiece;
         temp.destination_rank = rank + 1;
         temp.destination_file = 'a' + numFile - 1 + 2;
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
+
       }
-      
+
     } else {
       temp.piece_moved = numPiece;
       temp.destination_rank = rank + 1;
       temp.destination_file = 'a' + numFile - 1 + 2;
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   }
-  
+
   //+2 +1
   if (rank + 2 <= 8 && numFile + 1 <= 8) {
     if (board[rank + 2][numFile + 1].isOccupied) {
@@ -1346,27 +1346,27 @@ std::vector<ai_move> AI::knight_movement(std::vector<ai_piece> myPieces, std::ve
         temp.piece_moved = numPiece;
         temp.destination_rank = rank + 2;
         temp.destination_file = 'a' + numFile - 1 + 1;
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
-        
+
+
       }
-      
+
     } else {
       temp.piece_moved = numPiece;
       temp.destination_rank = rank + 2;
       temp.destination_file = 'a' + numFile - 1 + 1;
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   }
-  
+
   //+1 -2
   if (rank + 1 <= 8 && numFile - 2 > 0) {
     if (board[rank + 1][numFile - 2].isOccupied) {
@@ -1374,26 +1374,26 @@ std::vector<ai_move> AI::knight_movement(std::vector<ai_piece> myPieces, std::ve
         temp.piece_moved = numPiece;
         temp.destination_rank = rank + 1;
         temp.destination_file = 'a' + numFile - 1 - 2;
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
+
       }
-      
+
     } else {
       temp.piece_moved = numPiece;
       temp.destination_rank = rank + 1;
       temp.destination_file = 'a' + numFile - 1 - 2;
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   }
-  
+
   //+2 -1
   if (rank + 2 <= 8 && numFile - 1 > 0) {
     if (board[rank + 2][numFile - 1].isOccupied) {
@@ -1401,27 +1401,27 @@ std::vector<ai_move> AI::knight_movement(std::vector<ai_piece> myPieces, std::ve
         temp.piece_moved = numPiece;
         temp.destination_rank = rank + 2;
         temp.destination_file = 'a' + numFile - 1 - 1;
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
-        
+
+
       }
-      
+
     } else {
       temp.piece_moved = numPiece;
       temp.destination_rank = rank + 2;
       temp.destination_file = 'a' + numFile - 1 - 1;
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   }
-  
+
   //-1 -2
   if (rank - 1 > 0 && numFile - 2 > 0) {
     if (board[rank - 1][numFile - 2].isOccupied) {
@@ -1429,27 +1429,27 @@ std::vector<ai_move> AI::knight_movement(std::vector<ai_piece> myPieces, std::ve
         temp.piece_moved = numPiece;
         temp.destination_rank = rank - 1;
         temp.destination_file = 'a' + numFile - 1 - 2;
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
-        
+
+
       }
-      
+
     } else {
       temp.piece_moved = numPiece;
       temp.destination_rank = rank - 1;
       temp.destination_file = 'a' + numFile - 1 - 2;
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   }
-  
+
   //-2 -1
   if (rank - 2 > 0 && numFile - 1 > 0) {
     if (board[rank - 2][numFile - 1].isOccupied) {
@@ -1457,27 +1457,27 @@ std::vector<ai_move> AI::knight_movement(std::vector<ai_piece> myPieces, std::ve
         temp.piece_moved = numPiece;
         temp.destination_rank = rank - 2;
         temp.destination_file = 'a' + numFile - 1 - 1;
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
-        
+
+
       }
-      
+
     } else {
       temp.piece_moved = numPiece;
       temp.destination_rank = rank - 2;
       temp.destination_file = 'a' + numFile - 1 - 1;
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   }
-  
+
   //-1 +2
   if (rank - 1 > 0 && numFile + 2 <= 8) {
     if (board[rank - 1][numFile + 2].isOccupied) {
@@ -1485,27 +1485,27 @@ std::vector<ai_move> AI::knight_movement(std::vector<ai_piece> myPieces, std::ve
         temp.piece_moved = numPiece;
         temp.destination_rank = rank - 1;
         temp.destination_file = 'a' + numFile - 1 + 2;
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
-        
+
+
       }
-      
+
     } else {
       temp.piece_moved = numPiece;
       temp.destination_rank = rank - 1;
       temp.destination_file = 'a' + numFile - 1 + 2;
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   }
-  
+
   //-2 +1
   if (rank - 2 > 0 && numFile + 1 <= 8) {
     if (board[rank - 2][numFile + 1].isOccupied) {
@@ -1513,27 +1513,27 @@ std::vector<ai_move> AI::knight_movement(std::vector<ai_piece> myPieces, std::ve
         temp.piece_moved = numPiece;
         temp.destination_rank = rank - 2;
         temp.destination_file = 'a' + numFile - 1 + 1;
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
-        
+
+
       }
-      
+
     } else {
       temp.piece_moved = numPiece;
       temp.destination_rank = rank - 2;
       temp.destination_file = 'a' + numFile - 1 + 1;
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   }
-  
+
   return moves_Got;
 } //Knight Movement Function.
 
@@ -1543,7 +1543,7 @@ std::vector<ai_move> AI::king_movement(std::vector<ai_piece> myPieces, std::vect
   //Variable Declaration:
   ai_move temp;
   std::vector<ai_move> moves_Got;
-  
+
   //+1 +0
   if (rank + 1 <= 8) {
     if (board[rank + 1][numFile ].isOccupied == true) {
@@ -1551,26 +1551,26 @@ std::vector<ai_move> AI::king_movement(std::vector<ai_piece> myPieces, std::vect
         temp.piece_moved = numPiece;
         temp.destination_rank = rank + 1;
         temp.destination_file = ('a' + numFile - 1 );
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
+
       }
-      
+
     } else {
       temp.piece_moved = numPiece;
       temp.destination_rank = rank + 1;
       temp.destination_file = ('a' + numFile - 1 );
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   }
-  
+
   //-1 +0
   if (rank - 1 > 0) {
     if (board[rank - 1][numFile ].isOccupied == true) {
@@ -1578,26 +1578,26 @@ std::vector<ai_move> AI::king_movement(std::vector<ai_piece> myPieces, std::vect
         temp.piece_moved = numPiece;
         temp.destination_rank = rank - 1;
         temp.destination_file = ('a' + numFile - 1 );
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
+
       }
-      
+
     } else {
       temp.piece_moved = numPiece;
       temp.destination_rank = rank - 1;
       temp.destination_file = ('a' + numFile - 1 );
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   }
-  
+
   //+0 +1
   if (numFile + 1 <= 8) {
     if (board[rank ][numFile + 1].isOccupied == true) {
@@ -1605,26 +1605,26 @@ std::vector<ai_move> AI::king_movement(std::vector<ai_piece> myPieces, std::vect
         temp.piece_moved = numPiece;
         temp.destination_rank = rank ;
         temp.destination_file = ('a' + numFile - 1 + 1);
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
+
       }
-      
+
     } else {
       temp.piece_moved = numPiece;
       temp.destination_rank = rank ;
       temp.destination_file = ('a' + numFile - 1 + 1);
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   }
-  
+
   //+0 -1
   if (numFile - 1 > 0) {
     if (board[rank ][numFile - 1].isOccupied == true) {
@@ -1632,26 +1632,26 @@ std::vector<ai_move> AI::king_movement(std::vector<ai_piece> myPieces, std::vect
         temp.piece_moved = numPiece;
         temp.destination_rank = rank ;
         temp.destination_file = ('a' + numFile - 1 - 1);
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
+
       }
-      
+
     } else {
       temp.piece_moved = numPiece;
       temp.destination_rank = rank ;
       temp.destination_file = ('a' + numFile - 1 - 1);
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   }
-  
+
   //+1 +1
   if (rank + 1 <= 8 && numFile + 1 <= 8) {
     if (board[rank + 1][numFile + 1].isOccupied == true) {
@@ -1659,26 +1659,26 @@ std::vector<ai_move> AI::king_movement(std::vector<ai_piece> myPieces, std::vect
         temp.piece_moved = numPiece;
         temp.destination_rank = rank + 1;
         temp.destination_file = ('a' + numFile - 1 + 1);
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
+
       }
-      
+
     } else {
       temp.piece_moved = numPiece;
       temp.destination_rank = rank + 1;
       temp.destination_file = ('a' + numFile - 1 + 1);
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   }
-  
+
   //+1 -1
   if (rank + 1 <= 8 && numFile - 1 > 0) {
     if (board[rank + 1][numFile - 1].isOccupied == true) {
@@ -1686,26 +1686,26 @@ std::vector<ai_move> AI::king_movement(std::vector<ai_piece> myPieces, std::vect
         temp.piece_moved = numPiece;
         temp.destination_rank = rank + 1;
         temp.destination_file = ('a' + numFile - 1 - 1);
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
+
       }
-      
+
     } else {
       temp.piece_moved = numPiece;
       temp.destination_rank = rank + 1;
       temp.destination_file = ('a' + numFile - 1 - 1);
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   }
-  
+
   //-1 -1
   if (rank - 1 > 0 && numFile - 1 > 0) {
     if (board[rank - 1][numFile - 1].isOccupied == true) {
@@ -1713,26 +1713,26 @@ std::vector<ai_move> AI::king_movement(std::vector<ai_piece> myPieces, std::vect
         temp.piece_moved = numPiece;
         temp.destination_rank = rank - 1;
         temp.destination_file = ('a' + numFile - 1 - 1);
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
+
       }
-      
+
     } else {
       temp.piece_moved = numPiece;
       temp.destination_rank = rank - 1;
       temp.destination_file = ('a' + numFile - 1 - 1);
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   }
-  
+
   //-1 +1
   if (rank - 1 > 0 && numFile + 1 <= 8) {
     if (board[rank - 1][numFile + 1].isOccupied == true) {
@@ -1740,26 +1740,26 @@ std::vector<ai_move> AI::king_movement(std::vector<ai_piece> myPieces, std::vect
         temp.piece_moved = numPiece;
         temp.destination_rank = rank - 1;
         temp.destination_file = ('a' + numFile - 1 + 1);
-        
+
         if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
           moves_Got.push_back(temp);
         }
-        
+
       }
-      
+
     } else {
       temp.piece_moved = numPiece;
       temp.destination_rank = rank - 1;
       temp.destination_file = ('a' + numFile - 1 + 1);
-      
+
       if (valid_move(myPieces, oppPieces, temp, board, myColor, oppColor, rankDir)) {
         moves_Got.push_back(temp);
       }
-      
+
     }
-    
+
   }
-  
+
   return moves_Got;
 } //King Movement Function.
 
@@ -1780,19 +1780,19 @@ ai_move AI::miniMax(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
   bool repeat;
   int alpha;
   int beta;
-  
+
   //Initialize variables.
   myCaptured.clear();
   oppCaptured.clear();
   maxValue = -100;
   repeat = false;
-  
+
   //Get all possible moves at this node.
   allMoves = action(myPieces, oppPieces, board, player -> color, player -> opponent -> color, player -> rank_direction);
-  
+
   //Call the minVal function on each move.
   for (int i = 0; i < allMoves.size(); i++) {
-    
+
     //
     tempMove.piece_moved = allMoves[i].piece_moved;
     tempMove.origin_file = myPieces[allMoves[i].piece_moved].file;
@@ -1800,22 +1800,22 @@ ai_move AI::miniMax(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
     tempMove.destination_file = allMoves[i].destination_file;
     tempMove.destination_rank = allMoves[i].destination_rank;
     repeat = false;
-    
+
     for (int j = 0; j < previous_moves.size(); j++) {
       if ((tempMove.piece_moved == previous_moves[j].piece_moved) && (tempMove.origin_file == myPieces[allMoves[i].piece_moved].file) && (tempMove.origin_rank == myPieces[allMoves[i].piece_moved].rank)
           && (tempMove.destination_file == allMoves[i].destination_file) && (tempMove.destination_rank == allMoves[i].destination_rank) ) {
         repeat = true;
       }
     }
-    
-    
+
+
     //////////////////////////////////////////////
     //Create a temp board with the move applied.//
     //////////////////////////////////////////////
-    
+
     //Create a temp board.
     tempBoard = board;
-    
+
     //Get file number for where the piece originates.
     if (myPieces[allMoves[i].piece_moved].file == "a") {
       numfile = 1;
@@ -1834,12 +1834,12 @@ ai_move AI::miniMax(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
     } else if (myPieces[allMoves[i].piece_moved].file == "h") {
       numfile = 8;
     }
-    
+
     //Erase piece from previous location on the board.
     tempBoard[myPieces[allMoves[i].piece_moved].rank][numfile].isOccupied = false;
     tempBoard[myPieces[allMoves[i].piece_moved].rank][numfile].owner = "";
     tempBoard[myPieces[allMoves[i].piece_moved].rank][numfile].piece = 0;
-    
+
     //Get file number for where the piece would end up.
     if (allMoves[i].destination_file == "a") {
       numfile = 1;
@@ -1858,52 +1858,52 @@ ai_move AI::miniMax(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPie
     } else if (allMoves[i].destination_file == "h") {
       numfile = 8;
     }
-    
+
     //Update captured flag on piece.
     if (tempBoard[allMoves[i].destination_rank][numfile].isOccupied == true) {
       oppPieces[tempBoard[allMoves[i].destination_rank][numfile].piece].captured = true;
     }
-    
+
     //Place piece in new location on board.
     tempBoard[allMoves[i].destination_rank][numfile].isOccupied = true;
     tempBoard[allMoves[i].destination_rank][numfile].owner = player -> color;
     tempBoard[allMoves[i].destination_rank][numfile].piece = allMoves[i].piece_moved;
-    
+
     ///////////////////////////////////////////////////
     //END: Create a temp board with the move applied.//
     ///////////////////////////////////////////////////
-    
+
     //Initialize Alpha/Beta values.
     alpha = -1000;
     beta = 1000;
-    
+
     //MinVal function call.
     minValue = minVal(myPieces, oppPieces, (limit-1), tempBoard, myCaptured, oppCaptured, alpha, beta);
-    
+
     //Prune if necessary
     if (minValue > beta) {
       break;
     }
-    
+
     //Penalize the move 50 points if it is a repeat one of the last 3 moves.
     if (repeat) {
       minValue = minValue - 50;
     }
-    
+
     //Set best action and alpha values.
     if (minValue > maxValue && minValue > alpha) {
       maxMove = i;
       maxValue = minValue;
       alpha = minValue;
     }
-    
+
   }
-  
+
   //Once the best move is found, return that move.
   toMove.piece_moved = allMoves[maxMove].piece_moved;
   toMove.destination_rank = allMoves[maxMove].destination_rank;
   toMove.destination_file = allMoves[maxMove].destination_file;
-  
+
   return toMove;
 } //MiniMax Function.
 
@@ -1918,38 +1918,38 @@ int AI::minVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, 
   ai_piece tempPiece;
   std::vector< std::vector<tile> > tempBoard;
   bool timeUp;
-  
+
   //Initialize Variables:
   minValue = 100;
-  
+
   //See if time alotted for move is up.
   timeUp = false;
   if (((clock() - startTime)/CLOCKS_PER_SEC) > moveTime) {
     timeUp = true;
-    
+
     //std::cout<<"Used: "<<((clock() - startTime)/CLOCKS_PER_SEC)<<" Alotted: "<<moveTime<<std::endl;
   }
-  
+
   //If depth limit reached, return the value for the pieces on the board.
   if (limit <= 0 || timeUp) {
     value = getValue(myPieces, oppPieces, board);
-    
+
     return value;
   }
-  
+
   //Get all possible moves at this node.
   allMoves = action(oppPieces, myPieces, board, player -> opponent -> color, player -> color, player -> opponent -> rank_direction);
-  
+
   //Call the maxVal function on each move.
   for (int i = 0; i < allMoves.size(); i++) {
-    
+
     //////////////////////////////////////////////
     //Create a temp board with the move applied.//
     //////////////////////////////////////////////
-    
+
     //Create a temp board.
     tempBoard = board;
-    
+
     //Get file number for where the piece originates.
     if (oppPieces[allMoves[i].piece_moved].file == "a") {
       numfile = 1;
@@ -1968,12 +1968,12 @@ int AI::minVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, 
     } else if (oppPieces[allMoves[i].piece_moved].file == "h") {
       numfile = 8;
     }
-    
+
     //Erase piece from previous location on the board.
     tempBoard[oppPieces[allMoves[i].piece_moved].rank][numfile].isOccupied = false;
     tempBoard[oppPieces[allMoves[i].piece_moved].rank][numfile].owner = "";
     tempBoard[oppPieces[allMoves[i].piece_moved].rank][numfile].piece = 0;
-    
+
     //Get file number for where the piece would end up.
     if (allMoves[i].destination_file == "a") {
       numfile = 1;
@@ -1992,38 +1992,38 @@ int AI::minVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, 
     } else if (allMoves[i].destination_file == "h") {
       numfile = 8;
     }
-  
+
     //Update captured flag on piece.
     if (tempBoard[allMoves[i].destination_rank][numfile].isOccupied == true) {
       myPieces[tempBoard[allMoves[i].destination_rank][numfile].piece].captured = true;
     }
-    
+
     //Place piece in new location on board.
     tempBoard[allMoves[i].destination_rank][numfile].isOccupied = true;
     tempBoard[allMoves[i].destination_rank][numfile].owner = player -> opponent -> color;
     tempBoard[allMoves[i].destination_rank][numfile].piece = allMoves[i].piece_moved;
-    
+
     ///////////////////////////////////////////////////
     //END: Create a temp board with the move applied.//
     ///////////////////////////////////////////////////
-    
+
     //MaxVal function call.
     maxValue = maxVal(myPieces, oppPieces, (limit-1), tempBoard, myCaptured, oppCaptured, alpha, beta);
-  
+
     //Prune if necessary
     if (maxValue < alpha) {
       break;
     }
-    
+
     //Set best action and beta values.
     if (maxValue < minValue && maxValue < beta) {
-      
+
       minValue = maxValue;
       beta = maxValue;
     }
-    
+
   }
-  
+
   //Once the lowest value has been found, return that value.
   return minValue;
 } //MinVal Function.
@@ -2039,38 +2039,38 @@ int AI::maxVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, 
   ai_piece tempPiece;
   std::vector< std::vector<tile> > tempBoard;
   bool timeUp;
-  
+
   //Initialize Variables:
   maxValue = -100;
-  
+
   //See if time alotted for move is up.
   timeUp = false;
   if (((clock() - startTime)/CLOCKS_PER_SEC) > moveTime) {
     timeUp = true;
-  
+
     //std::cout<<"Used: "<<((clock() - startTime)/CLOCKS_PER_SEC)<<" Alotted: "<<moveTime<<std::endl;
   }
-  
+
   //If depth limit reached, return the value for the pieces on the board.
   if (limit <= 0 || timeUp) {
     value = getValue(myPieces, oppPieces, board);
-    
+
     return value;
   }
-  
+
   //Get all possible moves at this node.
   allMoves = action(myPieces, oppPieces, board, player -> color, player -> opponent -> color, player -> rank_direction);
-  
+
   //Call the maxVal function on each move.
   for (int i = 0; i < allMoves.size(); i++) {
-    
+
     //////////////////////////////////////////////
     //Create a temp board with the move applied.//
     //////////////////////////////////////////////
-    
+
     //Create a temp board.
     tempBoard = board;
-    
+
     //Get file number for where the piece originates.
     if (myPieces[allMoves[i].piece_moved].file == "a") {
       numfile = 1;
@@ -2089,12 +2089,12 @@ int AI::maxVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, 
     } else if (myPieces[allMoves[i].piece_moved].file == "h") {
       numfile = 8;
     }
-    
+
     //Erase piece from previous location on the board.
     tempBoard[myPieces[allMoves[i].piece_moved].rank][numfile].isOccupied = false;
     tempBoard[myPieces[allMoves[i].piece_moved].rank][numfile].owner = "";
     tempBoard[myPieces[allMoves[i].piece_moved].rank][numfile].piece = 0;
-    
+
     //Get file number for where the piece would end up.
     if (allMoves[i].destination_file == "a") {
       numfile = 1;
@@ -2113,38 +2113,38 @@ int AI::maxVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, 
     } else if (allMoves[i].destination_file == "h") {
       numfile = 8;
     }
-  
+
     //Update captured flag on piece.
     if (tempBoard[allMoves[i].destination_rank][numfile].isOccupied == true) {
       oppPieces[tempBoard[allMoves[i].destination_rank][numfile].piece].captured = true;
     }
-    
+
     //Place piece in new location on board.
     tempBoard[allMoves[i].destination_rank][numfile].isOccupied = true;
     tempBoard[allMoves[i].destination_rank][numfile].owner = player -> color;
     tempBoard[allMoves[i].destination_rank][numfile].piece = allMoves[i].piece_moved;
-    
+
     ///////////////////////////////////////////////////
     //END: Create a temp board with the move applied.//
     ///////////////////////////////////////////////////
-    
+
     //MinVal function call.
     minValue = minVal(myPieces, oppPieces, (limit-1), tempBoard, myCaptured, oppCaptured, alpha, beta);
-  
+
     //Prune if necessary
     if (minValue > beta) {
       break;
     }
-    
+
     //Set best action and alplha values.
     if (minValue > maxValue && minValue > alpha) {
-      
+
       maxValue = minValue;
       alpha = minValue;
     }
-    
+
   }
-  
+
   //Once the lowest value has been found, return that value.
   return maxValue;
 } //MaxVal Function.
@@ -2153,7 +2153,7 @@ int AI::maxVal(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, 
 int AI::getValue(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces, std::vector< std::vector<tile> > board) {
   //Variable Declaration:
   int value;
-  
+
   value = 0;
   //Iterate through the board, and calculate the value of the pieces on it.
   for (int i = 1; i <= 8; i++) {
@@ -2164,50 +2164,50 @@ int AI::getValue(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces
         if (board[i][j].owner == player->color) {
           if (player->pieces[board[i][j].piece]->type == "Pawn") {
             value = value + 1;
-            
+
           } else if (player->pieces[board[i][j].piece]->type == "Bishop") {
             value = value + 3;
-            
+
           } else if (player->pieces[board[i][j].piece]->type == "Rook") {
             value = value + 5;
-            
+
           } else if (player->pieces[board[i][j].piece]->type == "Knight") {
             value = value + 3;
-            
+
           } else if (player->pieces[board[i][j].piece]->type == "Queen") {
             value = value + 9;
-            
+
           }
-          
+
         } //If player color
-        
+
         //If piece is owned by the opponent.
         if (board[i][j].owner == player -> opponent -> color) {
           if (player->pieces[board[i][j].piece]->type == "Pawn") {
             value = value - 1;
-            
+
           } else if (player->pieces[board[i][j].piece]->type == "Bishop") {
             value = value - 3;
-            
+
           } else if (player->pieces[board[i][j].piece]->type == "Rook") {
             value = value - 5;
-            
+
           } else if (player->pieces[board[i][j].piece]->type == "Knight") {
             value = value - 3;
-            
+
           } else if (player->pieces[board[i][j].piece]->type == "Queen") {
             value = value - 9;
-            
+
           }
-          
+
         } //If opponent color.
-        
+
       } //If tile is occupied.
-      
+
     }
-    
+
   } //Board iteration.
-  
+
   //If player is in check, subtract 7 from the score.  If opponent is in check, add 3 to the score.
   if (in_check(player -> color, player -> opponent -> color, myPieces, oppPieces, board, player -> rank_direction)) {
     value = value - 7;
@@ -2215,7 +2215,7 @@ int AI::getValue(std::vector<ai_piece> myPieces, std::vector<ai_piece> oppPieces
   if (in_check(player -> opponent -> color, player -> color, oppPieces, myPieces, board, player -> rank_direction)) {
     value = value + 3;
   }
-  
+
   return value;
 } //Get Value Function.
 
@@ -2229,23 +2229,23 @@ bool AI::in_check(std::string myColor, std::string oppColor, std::vector<ai_piec
   int diagMoves;
   bool valid;
   bool done;
-  
+
   valid = true;
-  
+
   ///////////////////////////
   //Get King rank and file.//
   ///////////////////////////
-  
+
   //Find King piece.
   for (int l = 0; l < myPieces.size(); l++) {
     if (myPieces[l].type == "King") {
       king = l;
     }
   }
-  
+
   //Get rank and file.
   rank = myPieces[king].rank;
-  
+
   if (myPieces[king].file == "a") {
     numfile = 1;
   } else if (myPieces[king].file == "b") {
@@ -2263,15 +2263,15 @@ bool AI::in_check(std::string myColor, std::string oppColor, std::vector<ai_piec
   } else if (myPieces[king].file == "h") {
     numfile = 8;
   } //Get King rank and file.
-  
+
   /////////////////////////////////////////////////////////////////////////////////
   //Check 4 directions and 4 diagonals to see if a piece places my king in check.//
   /////////////////////////////////////////////////////////////////////////////////
-  
+
   ///////////////////////
   //Check 4 directions.//
   ///////////////////////
-  
+
   //Check positive rank.
   done = false;
   for (int i = (rank+1); i <= 8; i++) {
@@ -2284,14 +2284,14 @@ bool AI::in_check(std::string myColor, std::string oppColor, std::vector<ai_piec
             oppPieces[board[i][numfile].piece].type == "Queen") {
           valid = false;
         }
-        
+
       }
-      
+
       done = true;
     }
-    
+
   } //Positive rank.
-  
+
   //Check negative rank.
   done = false;
   for (int i = (rank-1); i > 0; i--) {
@@ -2304,14 +2304,14 @@ bool AI::in_check(std::string myColor, std::string oppColor, std::vector<ai_piec
             oppPieces[board[i][numfile].piece].type == "Queen") {
           valid = false;
         }
-        
+
       }
-      
+
       done = true;
     }
-    
+
   } //Negative Rank
-  
+
   //Check positive file.
   done = false;
   for (int i = (numfile+1); i <= 8; i++) {
@@ -2324,15 +2324,15 @@ bool AI::in_check(std::string myColor, std::string oppColor, std::vector<ai_piec
             oppPieces[board[rank][i].piece].type == "Queen") {
           valid = false;
         }
-        
+
       }
-      
+
       done = true;
     }
-    
+
   } //Positive File.
-  
-  
+
+
   //Check negative file.
   done = false;
   for (int i = (numfile-1); i > 0; i--) {
@@ -2345,18 +2345,18 @@ bool AI::in_check(std::string myColor, std::string oppColor, std::vector<ai_piec
             oppPieces[board[rank][i].piece].type == "Queen") {
           valid = false;
         }
-        
+
       }
-      
+
       done = true;
     }
-    
+
   } //Negative File.
-  
+
   ////////////////////
   //Check Diagonals.//
   ////////////////////
-  
+
   //Check 1st quadrant diagonal.
   done = false;
   if (rank > numfile) {
@@ -2381,15 +2381,15 @@ bool AI::in_check(std::string myColor, std::string oppColor, std::vector<ai_piec
             oppPieces[board[rank + i][numfile + i].piece].type == "Queen") {
           valid = false;
         }
-        
+
       }
-      
+
       done = true;
     }
-    
+
   } //1st Quadrant Diagonal
-  
-  
+
+
   //Check 2nd quadrant diagonal.
   done = false;
   if ((8 - rank) < numfile) {
@@ -2414,14 +2414,14 @@ bool AI::in_check(std::string myColor, std::string oppColor, std::vector<ai_piec
             oppPieces[board[rank + i][numfile - i].piece].type == "Queen") {
           valid = false;
         }
-        
+
       }
-      
+
       done = true;
     }
-    
+
   }
-  
+
   //Check 3rd quadrant diagonal.
   done = false;
   if (rank > numfile) {
@@ -2446,14 +2446,14 @@ bool AI::in_check(std::string myColor, std::string oppColor, std::vector<ai_piec
             oppPieces[board[rank - i][numfile - i].piece].type == "Queen") {
           valid = false;
         }
-        
+
       }
-      
+
       done = true;
     }
-    
+
   }
-  
+
   //Check 4th quadrant diagonal.
   done = false;
   if (numfile <= (8 - rank)) {
@@ -2478,20 +2478,20 @@ bool AI::in_check(std::string myColor, std::string oppColor, std::vector<ai_piec
             oppPieces[board[rank - i][numfile + i].piece].type == "Queen") {
           valid = false;
         }
-        
+
       }
-      
+
       done = true;
     }
-    
+
   }
-  
+
   /////////////////////
   //Check for Knights//
   /////////////////////
-  
+
   //Check for possible knights placing the king in check.
-  
+
   //+1 +2
   if (rank + 1 <= 8 && numfile + 2 <= 8) {
     if (board[rank + 1][numfile + 2].isOccupied) {
@@ -2499,13 +2499,13 @@ bool AI::in_check(std::string myColor, std::string oppColor, std::vector<ai_piec
         if (oppPieces[board[rank + 1][numfile + 2].piece].type == "Knight") {
           valid = false;
         }
-        
+
       }
-      
+
     }
-    
+
   }
-  
+
   //+2 +1
   if (rank + 2 <= 8 && numfile + 1 <= 8) {
     if (board[rank + 2][numfile + 1].isOccupied) {
@@ -2513,13 +2513,13 @@ bool AI::in_check(std::string myColor, std::string oppColor, std::vector<ai_piec
         if (oppPieces[board[rank + 2][numfile + 1].piece].type == "Knight") {
           valid = false;
         }
-        
+
       }
-      
+
     }
-    
+
   }
-  
+
   //+1 -2
   if (rank + 1 <= 8 && numfile - 2 > 0) {
     if (board[rank + 1][numfile - 2].isOccupied) {
@@ -2527,13 +2527,13 @@ bool AI::in_check(std::string myColor, std::string oppColor, std::vector<ai_piec
         if (oppPieces[board[rank + 1][numfile - 2].piece].type == "Knight") {
           valid = false;
         }
-        
+
       }
-      
+
     }
-    
+
   }
-  
+
   //+2 -1
   if (rank + 2 <= 8 && numfile - 1 > 0) {
     if (board[rank + 2][numfile - 1].isOccupied) {
@@ -2541,13 +2541,13 @@ bool AI::in_check(std::string myColor, std::string oppColor, std::vector<ai_piec
         if (oppPieces[board[rank + 2][numfile - 1].piece].type == "Knight") {
           valid = false;
         }
-        
+
       }
-      
+
     }
-    
+
   }
-  
+
   //-1 -2
   if (rank - 1 > 0 && numfile - 2 > 0) {
     if (board[rank - 1][numfile - 2].isOccupied) {
@@ -2555,13 +2555,13 @@ bool AI::in_check(std::string myColor, std::string oppColor, std::vector<ai_piec
         if (oppPieces[board[rank - 1][numfile - 2].piece].type == "Knight") {
           valid = false;
         }
-        
+
       }
-      
+
     }
-    
+
   }
-  
+
   //-2 -1
   if (rank - 2 > 0 && numfile - 1 > 0) {
     if (board[rank - 2][numfile - 1].isOccupied) {
@@ -2569,13 +2569,13 @@ bool AI::in_check(std::string myColor, std::string oppColor, std::vector<ai_piec
         if (oppPieces[board[rank - 2][numfile - 1].piece].type == "Knight") {
           valid = false;
         }
-        
+
       }
-      
+
     }
-    
+
   }
-  
+
   //-1 +2
   if (rank - 1 > 0 && numfile + 2 <= 8) {
     if (board[rank - 1][numfile + 2].isOccupied) {
@@ -2583,13 +2583,13 @@ bool AI::in_check(std::string myColor, std::string oppColor, std::vector<ai_piec
         if (oppPieces[board[rank - 1][numfile + 2].piece].type == "Knight") {
           valid = false;
         }
-        
+
       }
-      
+
     }
-    
+
   }
-  
+
   //-2 +1
   if (rank - 2 > 0 && numfile + 1 <= 8) {
     if (board[rank - 2][numfile + 1].isOccupied) {
@@ -2597,13 +2597,13 @@ bool AI::in_check(std::string myColor, std::string oppColor, std::vector<ai_piec
         if (oppPieces[board[rank - 2][numfile + 1].piece].type == "Knight") {
           valid = false;
         }
-        
+
       }
-      
+
     }
-    
+
   }
-  
+
   //Return value of valid
   return valid;
 }
